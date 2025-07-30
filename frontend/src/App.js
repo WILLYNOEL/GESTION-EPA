@@ -245,6 +245,20 @@ function App() {
     );
   };
 
+  const getFilteredPaiements = () => {
+    if (!paiementsSearch.trim()) return paiements;
+    return paiements.filter(p => {
+      const client = clients.find(c => c.client_id === p.client_id);
+      const facture = factures.find(f => f.facture_id === p.document_id);
+      return (
+        (client && client.nom.toLowerCase().includes(paiementsSearch.toLowerCase())) ||
+        (facture && facture.numero_facture.toLowerCase().includes(paiementsSearch.toLowerCase())) ||
+        p.mode_paiement.toLowerCase().includes(paiementsSearch.toLowerCase()) ||
+        (p.reference_paiement && p.reference_paiement.toLowerCase().includes(paiementsSearch.toLowerCase()))
+      );
+    });
+  };
+
   // Fetch data functions
   const fetchAll = async () => {
     try {
