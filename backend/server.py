@@ -797,9 +797,7 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             header_style.alignment = 1  # Center alignment
             
             # Create PROFESSIONAL ECO PUMP AFRIK logo inspired by client's design
-            from reportlab.lib.shapes import Drawing
-            from reportlab.graphics.shapes import Rect, String as GraphicsString
-            from reportlab.graphics import renderPDF
+            # Note: Using table-based layout instead of graphics for better compatibility
             
             # Professional logo header with company branding
             logo_table_data = [
