@@ -2143,6 +2143,18 @@ def main():
     test_results.append(tester.test_specialized_list_generation_endpoints())
     test_results.append(tester.test_specialized_lists_branding_validation())
     
+    # 🎯 PRIORITY: ECO PUMP AFRIK LOGO INTEGRATION TESTING
+    print("\n" + "=" * 70)
+    print("🎯 PRIORITY: ECO PUMP AFRIK LOGO INTEGRATION TESTING")
+    print("=" * 70)
+    print("COMPREHENSIVE LOGO VALIDATION:")
+    print("- Document PDFs (devis, facture, paiement)")
+    print("- Financial Reports (all 6 types)")
+    print("- Specialized Lists (all 3 types)")
+    print("- Logo fallback scenarios")
+    print("=" * 70)
+    test_results.append(tester.test_eco_pump_afrik_logo_integration_priority())
+    
     # 🚨 CRITICAL USER REPORTED CORRECTIONS - HIGHEST PRIORITY
     print("\n" + "=" * 70)
     print("🚨 TESTING USER REPORTED CORRECTIONS - ECO PUMP AFRIK")
