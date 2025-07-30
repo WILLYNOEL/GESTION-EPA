@@ -177,7 +177,7 @@ async def get_client(client_id: str):
 async def update_client(client_id: str, client_update: ClientUpdate):
     try:
         update_data = {k: v for k, v in client_update.dict().items() if v is not None}
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now().isoformat()
         
         result = clients_collection.update_one(
             {"client_id": client_id},
