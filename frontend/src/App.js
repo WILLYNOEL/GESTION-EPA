@@ -1565,7 +1565,228 @@ ECO PUMP AFRIK - Tous droits réservés`;
                       Créer un nouveau devis pour un client.
                     </DialogDescription>
                   </DialogHeader>
-                  {/* Devis form implementation similar to previous but with additional fields */}
+                  <form onSubmit={handleDevisSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="client">Client *</Label>
+                        <Select 
+                          value={devisForm.client_id} 
+                          onValueChange={(value) => {
+                            const selectedClient = clients.find(c => c.client_id === value);
+                            setDevisForm({ 
+                              ...devisForm, 
+                              client_id: value, 
+                              client_nom: selectedClient?.nom || '' 
+                            });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un client" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {clients.map((client) => (
+                              <SelectItem key={client.client_id} value={client.client_id}>
+                                {client.nom} ({client.devise})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="reference_commande">Référence commande</Label>
+                        <Input
+                          id="reference_commande"
+                          value={devisForm.reference_commande}
+                          onChange={(e) => setDevisForm({ ...devisForm, reference_commande: e.target.value })}
+                          placeholder="Ex: CMD2025001"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="delai_livraison">Délai de livraison</Label>
+                        <Input
+                          id="delai_livraison"
+                          value={devisForm.delai_livraison}
+                          onChange={(e) => setDevisForm({ ...devisForm, delai_livraison: e.target.value })}
+                          placeholder="Ex: 15 jours"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="conditions_paiement">Conditions de paiement</Label>
+                        <Input
+                          id="conditions_paiement"
+                          value={devisForm.conditions_paiement}
+                          onChange={(e) => setDevisForm({ ...devisForm, conditions_paiement: e.target.value })}
+                          placeholder="Ex: 30% à la commande, 70% à la livraison"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="mode_livraison">Mode de livraison</Label>
+                        <Input
+                          id="mode_livraison"
+                          value={devisForm.mode_livraison}
+                          onChange={(e) => setDevisForm({ ...devisForm, mode_livraison: e.target.value })}
+                          placeholder="Ex: Franco domicile"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Articles section */}
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <Label>Articles</Label>
+                        <Button 
+                          type="button" 
+                          onClick={() => {
+                            const newArticle = {
+                              item: devisForm.articles.length + 1,
+                              ref: '',
+                              designation: '',
+                              quantite: 1,
+                              prix_unitaire: 0,
+                              total: 0
+                            };
+                            setDevisForm({
+                              ...devisForm,
+                              articles: [...devisForm.articles, newArticle]
+                            });
+                          }} 
+                          size="sm" 
+                          variant="outline"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Ajouter un article
+                        </Button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {devisForm.articles.map((article, index) => (
+                          <Card key={index} className="p-4">
+                            <div className="grid grid-cols-6 gap-3 items-end">
+                              <div>
+                                <Label className="text-xs">REF</Label>
+                                <Input
+                                  value={article.ref}
+                                  onChange={(e) => {
+                                    const newArticles = [...devisForm.articles];
+                                    newArticles[index].ref = e.target.value;
+                                    setDevisForm({ ...devisForm, articles: newArticles });
+                                  }}
+                                  placeholder="Référence"
+                                  className="text-sm"
+                                />
+                              </div>
+                              <div className="col-span-2">
+                                <Label className="text-xs">Désignation *</Label>
+                                <Input
+                                  required
+                                  value={article.designation}
+                                  onChange={(e) => {
+                                    const newArticles = [...devisForm.articles];
+                                    newArticles[index].designation = e.target.value;
+                                    setDevisForm({ ...devisForm, articles: newArticles });
+                                  }}
+                                  placeholder="Description de l'article"
+                                  className="text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Qté *</Label>
+                                <Input
+                                  required
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={article.quantite}
+                                  onChange={(e) => {
+                                    const newArticles = [...devisForm.articles];
+                                    const qte = parseFloat(e.target.value) || 0;
+                                    newArticles[index].quantite = qte;
+                                    newArticles[index].total = qte * newArticles[index].prix_unitaire;
+                                    setDevisForm({ ...devisForm, articles: newArticles });
+                                  }}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Prix U. *</Label>
+                                <Input
+                                  required
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={article.prix_unitaire}
+                                  onChange={(e) => {
+                                    const newArticles = [...devisForm.articles];
+                                    const prix = parseFloat(e.target.value) || 0;
+                                    newArticles[index].prix_unitaire = prix;
+                                    newArticles[index].total = newArticles[index].quantite * prix;
+                                    setDevisForm({ ...devisForm, articles: newArticles });
+                                  }}
+                                  className="text-sm"
+                                />
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className="flex-1">
+                                  <Label className="text-xs">Total</Label>
+                                  <div className="text-sm font-medium p-2 bg-slate-100 rounded">
+                                    {formatCurrency(article.total)}
+                                  </div>
+                                </div>
+                                {devisForm.articles.length > 1 && (
+                                  <Button 
+                                    type="button" 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => {
+                                      const newArticles = devisForm.articles.filter((_, i) => i !== index);
+                                      // Renumber items
+                                      newArticles.forEach((a, i) => {
+                                        a.item = i + 1;
+                                      });
+                                      setDevisForm({ ...devisForm, articles: newArticles });
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Card className="bg-slate-50">
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span>Sous-total:</span>
+                            <span className="font-medium">{formatCurrency(calculateDevisTotal(devisForm.articles).sousTotal)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>TVA (18%):</span>
+                            <span className="font-medium">{formatCurrency(calculateDevisTotal(devisForm.articles).tva)}</span>
+                          </div>
+                          <div className="flex justify-between text-lg font-bold border-t pt-2">
+                            <span>Total TTC:</span>
+                            <span>{formatCurrency(calculateDevisTotal(devisForm.articles).totalTTC)}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline" onClick={() => setIsDevisDialogOpen(false)}>
+                        Annuler
+                      </Button>
+                      <Button type="submit" disabled={loading || !devisForm.client_id}>
+                        {loading ? 'Création...' : 'Créer le Devis'}
+                      </Button>
+                    </div>
+                  </form>
                 </DialogContent>
               </Dialog>
             </div>
