@@ -1540,7 +1540,11 @@ function App() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewDocument('facture', f.facture_id)}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {f.statut_paiement !== 'payé' && (
@@ -1563,7 +1567,11 @@ function App() {
                                   Paiement
                                 </Button>
                               )}
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDownloadDocument('facture', f.facture_id)}
+                              >
                                 <Download className="h-4 w-4" />
                               </Button>
                             </div>
