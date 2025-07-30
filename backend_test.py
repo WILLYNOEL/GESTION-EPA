@@ -452,9 +452,9 @@ class EcoPumpAfrikAPITester:
                 "fournisseur": "TEST"
             }
         )
-        if success and 'articles' in response and 'count' in response and 'filters_applied' in response:
+        if success and 'stock' in response and 'count' in response and 'filters_applied' in response:
             print(f"✅ /api/search/stock: Found {response['count']} articles with filters")
-            print(f"✅ Response includes: articles, count, filters_applied")
+            print(f"✅ Response includes: stock, count, filters_applied")
         else:
             print("❌ /api/search/stock failed or missing required fields")
             all_passed = False
