@@ -3750,10 +3750,15 @@ ECO PUMP AFRIK - Tous droits réservés`;
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="espèce">Espèce</SelectItem>
+                          <SelectItem value="espece">Espèces</SelectItem>
+                          <SelectItem value="cheque">Chèque</SelectItem>
                           <SelectItem value="virement">Virement bancaire</SelectItem>
                           <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                          <SelectItem value="chèque">Chèque</SelectItem>
+                          <SelectItem value="visa">Visa/Carte bancaire</SelectItem>
+                          <SelectItem value="mastercard">Mastercard</SelectItem>
+                          <SelectItem value="paypal">PayPal</SelectItem>
+                          <SelectItem value="crypto">Crypto-monnaie</SelectItem>
+                          <SelectItem value="autre">Autre</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
