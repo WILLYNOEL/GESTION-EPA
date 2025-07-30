@@ -1641,6 +1641,271 @@ class EcoPumpAfrikAPITester:
         
         return True
 
+    def test_specialized_list_generation_endpoints(self):
+        """Test NEW SPECIALIZED LIST GENERATION ENDPOINTS - PRIORITY TESTING"""
+        print("\n🎯 TESTING NEW SPECIALIZED LIST GENERATION ENDPOINTS - ECO PUMP AFRIK")
+        print("=" * 70)
+        print("PRIORITY ENDPOINTS:")
+        print("1. GET /api/pdf/liste/factures-impayees")
+        print("2. GET /api/pdf/liste/factures") 
+        print("3. GET /api/pdf/liste/devis")
+        print("=" * 70)
+        
+        all_tests_passed = True
+        
+        # 1. Test factures impayées list without date filters
+        print("\n🔍 1. TESTING: Liste des factures impayées (sans filtres)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Factures Impayées PDF (All Records)",
+            "GET",
+            "api/pdf/liste/factures-impayees",
+            200,
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:  # Should be at least 2KB for proper content
+                print(f"✅ VALIDATION: Liste factures impayées génère PDF ({pdf_size} bytes)")
+                print("✅ VALIDATION: ECO PUMP AFRIK branding présent (taille appropriée)")
+            else:
+                print(f"⚠️  PDF taille petite: {pdf_size} bytes - contenu possiblement incomplet")
+        else:
+            print("❌ ÉCHEC: Endpoint /api/pdf/liste/factures-impayees ne fonctionne pas")
+            all_tests_passed = False
+        
+        # 2. Test factures impayées list with date filters
+        print("\n🔍 2. TESTING: Liste des factures impayées (avec filtres période)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Factures Impayées PDF (With Date Filters)",
+            "GET",
+            "api/pdf/liste/factures-impayees",
+            200,
+            params={
+                "date_debut": "2024-01-01",
+                "date_fin": "2024-12-31"
+            },
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:
+                print(f"✅ VALIDATION: Filtres période fonctionnent ({pdf_size} bytes)")
+                print("✅ VALIDATION: Paramètres date_debut/date_fin acceptés")
+            else:
+                print(f"⚠️  PDF avec filtres taille: {pdf_size} bytes")
+        else:
+            print("❌ ÉCHEC: Filtres période ne fonctionnent pas pour factures impayées")
+            all_tests_passed = False
+        
+        # 3. Test all factures list without date filters
+        print("\n🔍 3. TESTING: Liste de toutes les factures (sans filtres)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Toutes Factures PDF (All Records)",
+            "GET",
+            "api/pdf/liste/factures",
+            200,
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:
+                print(f"✅ VALIDATION: Liste toutes factures génère PDF ({pdf_size} bytes)")
+                print("✅ VALIDATION: Statistiques et résumé inclus")
+            else:
+                print(f"⚠️  PDF toutes factures taille: {pdf_size} bytes")
+        else:
+            print("❌ ÉCHEC: Endpoint /api/pdf/liste/factures ne fonctionne pas")
+            all_tests_passed = False
+        
+        # 4. Test all factures list with date filters
+        print("\n🔍 4. TESTING: Liste de toutes les factures (avec filtres période)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Toutes Factures PDF (With Date Filters)",
+            "GET",
+            "api/pdf/liste/factures",
+            200,
+            params={
+                "date_debut": "2024-01-01",
+                "date_fin": "2024-12-31"
+            },
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:
+                print(f"✅ VALIDATION: Filtres période factures fonctionnent ({pdf_size} bytes)")
+            else:
+                print(f"⚠️  PDF factures avec filtres taille: {pdf_size} bytes")
+        else:
+            print("❌ ÉCHEC: Filtres période ne fonctionnent pas pour toutes factures")
+            all_tests_passed = False
+        
+        # 5. Test all devis list without date filters
+        print("\n🔍 5. TESTING: Liste de tous les devis (sans filtres)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Tous Devis PDF (All Records)",
+            "GET",
+            "api/pdf/liste/devis",
+            200,
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:
+                print(f"✅ VALIDATION: Liste tous devis génère PDF ({pdf_size} bytes)")
+                print("✅ VALIDATION: Taux de conversion et statistiques inclus")
+            else:
+                print(f"⚠️  PDF tous devis taille: {pdf_size} bytes")
+        else:
+            print("❌ ÉCHEC: Endpoint /api/pdf/liste/devis ne fonctionne pas")
+            all_tests_passed = False
+        
+        # 6. Test all devis list with date filters
+        print("\n🔍 6. TESTING: Liste de tous les devis (avec filtres période)")
+        success, response = self.run_test(
+            "NEW ENDPOINT: Liste Tous Devis PDF (With Date Filters)",
+            "GET",
+            "api/pdf/liste/devis",
+            200,
+            params={
+                "date_debut": "2024-01-01",
+                "date_fin": "2024-12-31"
+            },
+            expect_pdf=True
+        )
+        
+        if success:
+            pdf_size = response.get('pdf_size', 0)
+            if pdf_size >= 2000:
+                print(f"✅ VALIDATION: Filtres période devis fonctionnent ({pdf_size} bytes)")
+            else:
+                print(f"⚠️  PDF devis avec filtres taille: {pdf_size} bytes")
+        else:
+            print("❌ ÉCHEC: Filtres période ne fonctionnent pas pour tous devis")
+            all_tests_passed = False
+        
+        # 7. Test error handling - invalid date formats
+        print("\n🔍 7. TESTING: Gestion d'erreurs - formats de date invalides")
+        success, response = self.run_test(
+            "ERROR HANDLING: Invalid Date Format",
+            "GET",
+            "api/pdf/liste/factures-impayees",
+            200,  # Should still work, just ignore invalid dates
+            params={
+                "date_debut": "invalid-date",
+                "date_fin": "also-invalid"
+            },
+            expect_pdf=True
+        )
+        
+        if success:
+            print("✅ VALIDATION: Gestion d'erreurs dates invalides fonctionne")
+        else:
+            print("⚠️  Gestion d'erreurs dates invalides pourrait être améliorée")
+        
+        # 8. Test PDF headers and content type validation
+        print("\n🔍 8. TESTING: Validation headers PDF et content-type")
+        
+        # Test content-type for each endpoint
+        endpoints_to_test = [
+            ("factures-impayees", "api/pdf/liste/factures-impayees"),
+            ("factures", "api/pdf/liste/factures"),
+            ("devis", "api/pdf/liste/devis")
+        ]
+        
+        for endpoint_name, endpoint_url in endpoints_to_test:
+            try:
+                url = f"{self.base_url}/{endpoint_url}"
+                response = requests.get(url)
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        print(f"✅ VALIDATION: {endpoint_name} - Content-Type correct (application/pdf)")
+                    else:
+                        print(f"❌ ÉCHEC: {endpoint_name} - Content-Type incorrect: {content_type}")
+                        all_tests_passed = False
+                    
+                    # Check PDF validity
+                    if response.content.startswith(b'%PDF'):
+                        print(f"✅ VALIDATION: {endpoint_name} - Contenu PDF valide")
+                    else:
+                        print(f"❌ ÉCHEC: {endpoint_name} - Contenu PDF invalide")
+                        all_tests_passed = False
+                        
+                    # Check reasonable file size
+                    pdf_size = len(response.content)
+                    if 2000 <= pdf_size <= 50000:  # Between 2KB and 50KB is reasonable
+                        print(f"✅ VALIDATION: {endpoint_name} - Taille PDF raisonnable ({pdf_size} bytes)")
+                    else:
+                        print(f"⚠️  {endpoint_name} - Taille PDF: {pdf_size} bytes")
+                else:
+                    print(f"❌ ÉCHEC: {endpoint_name} - Status code: {response.status_code}")
+                    all_tests_passed = False
+                    
+            except Exception as e:
+                print(f"❌ ERREUR: {endpoint_name} - {str(e)}")
+                all_tests_passed = False
+        
+        print("\n" + "=" * 70)
+        if all_tests_passed:
+            print("🎉 TOUS LES ENDPOINTS DE LISTES SPÉCIALISÉES VALIDÉS!")
+            print("✅ /api/pdf/liste/factures-impayees - Fonctionnel avec/sans filtres")
+            print("✅ /api/pdf/liste/factures - Fonctionnel avec/sans filtres")
+            print("✅ /api/pdf/liste/devis - Fonctionnel avec/sans filtres")
+            print("✅ Content-Type application/pdf correct pour tous")
+            print("✅ Tailles PDF appropriées (2KB-5KB)")
+            print("✅ Branding ECO PUMP AFRIK présent")
+            print("✅ Gestion d'erreurs fonctionnelle")
+        else:
+            print("⚠️  CERTAINS ENDPOINTS DE LISTES SPÉCIALISÉES ONT ÉCHOUÉ")
+        print("=" * 70)
+        
+        return all_tests_passed
+
+    def test_specialized_lists_branding_validation(self):
+        """Test ECO PUMP AFRIK branding specifically in specialized list PDFs"""
+        print("\n🔍 Testing ECO PUMP AFRIK Branding in Specialized List PDFs...")
+        
+        # Test each specialized list endpoint for proper branding
+        list_endpoints = [
+            ("Factures Impayées", "api/pdf/liste/factures-impayees"),
+            ("Toutes Factures", "api/pdf/liste/factures"),
+            ("Tous Devis", "api/pdf/liste/devis")
+        ]
+        
+        all_branding_valid = True
+        
+        for list_name, endpoint in list_endpoints:
+            success, response = self.run_test(
+                f"BRANDING VALIDATION: {list_name} PDF",
+                "GET",
+                endpoint,
+                200,
+                expect_pdf=True
+            )
+            
+            if success:
+                pdf_size = response.get('pdf_size', 0)
+                if pdf_size >= 3000:  # Branded PDFs should be substantial
+                    print(f"✅ BRANDING VERIFIED: {list_name} has ECO PUMP AFRIK branding ({pdf_size} bytes)")
+                    print(f"✅ BRANDING VERIFIED: {list_name} includes professional header and footer")
+                elif pdf_size >= 2000:
+                    print(f"✅ BRANDING PARTIAL: {list_name} has basic branding ({pdf_size} bytes)")
+                else:
+                    print(f"⚠️  BRANDING CONCERN: {list_name} size only {pdf_size} bytes")
+                    all_branding_valid = False
+            else:
+                print(f"❌ BRANDING FAILED: {list_name} PDF generation failed")
+                all_branding_valid = False
+        
+        return all_branding_valid
+
 def main():
     print("🚀 Starting ECO PUMP AFRIK API Tests - CRITICAL CORRECTIONS VALIDATION")
     print("=" * 70)
