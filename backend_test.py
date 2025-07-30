@@ -603,7 +603,8 @@ class EcoPumpAfrikAPITester:
             "Generate Comprehensive Devis PDF",
             "GET",
             f"api/pdf/document/devis/{test_devis_id}",
-            200
+            200,
+            expect_pdf=True
         )
         
         if not success:
@@ -627,7 +628,8 @@ class EcoPumpAfrikAPITester:
             "Generate Comprehensive Facture PDF",
             "GET",
             f"api/pdf/document/facture/{test_facture_id}",
-            200
+            200,
+            expect_pdf=True
         )
         
         if not success:
@@ -662,7 +664,8 @@ class EcoPumpAfrikAPITester:
             "Generate Payment Receipt PDF",
             "GET",
             f"api/pdf/document/paiement/{test_paiement_id}",
-            200
+            200,
+            expect_pdf=True
         )
         
         return success
