@@ -2187,6 +2187,7 @@ async def login(user_credentials: UserLogin):
             "username": user["username"],
             "email": user.get("email"),
             "role": user["role"],
+            "permissions": user.get("permissions", {}),  # Inclure les permissions
             "last_login": user.get("last_login")
         }
         
