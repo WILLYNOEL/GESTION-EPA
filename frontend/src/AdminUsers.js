@@ -147,6 +147,43 @@ const AdminUsers = ({ token }) => {
     }
   };
 
+  const handleEditPermissions = (user) => {
+    setEditingPermissions(user);
+    setIsPermissionsDialogOpen(true);
+  };
+
+  const handleUpdatePermissions = async (userId, permissions) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/users/${userId}/permissions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          permissions: permissions
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess('Permissions mises à jour avec succès');
+        setIsPermissionsDialogOpen(false);
+        setEditingPermissions(null);
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        setError(data.detail || 'Erreur lors de la mise à jour des permissions');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError('Erreur de connexion au serveur');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       username: '',
