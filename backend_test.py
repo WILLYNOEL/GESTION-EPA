@@ -1693,10 +1693,16 @@ def main():
     print("🚨 TESTING USER REPORTED CORRECTIONS - ECO PUMP AFRIK")
     print("=" * 70)
     print("VALIDATION CRITIQUE - Corrections des problèmes signalés:")
-    print("1. Heures sur PDFs devis/factures")
-    print("2. Erreur MongoDB onglet STOCK corrigée")
-    print("3. Nouveaux endpoints de recherche avancée")
+    print("1. Erreur JavaScript onglet DEVIS corrigée (SelectItem values)")
+    print("2. Erreur MongoDB stock mise à jour corrigée (champs immutables)")
+    print("3. Nouveaux endpoints de recherche avancée fonctionnels")
+    print("4. Heures sur PDFs toujours fonctionnelles")
     print("=" * 70)
+    
+    # Test the specific critical corrections mentioned in the review
+    test_results.append(tester.test_pdf_generation_timestamps())
+    test_results.append(tester.test_mongodb_stock_update_error_correction())
+    test_results.append(tester.test_search_functionality())  # Now tests the 4 new search endpoints
     
     # Primary user validation test
     test_results.append(tester.test_user_reported_corrections_validation())
