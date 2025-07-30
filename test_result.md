@@ -178,6 +178,6 @@ test_plan:
 
 agent_communication:
     - agent: "main"
-    - message: "IMPLÉMENTATION TERMINÉE ✅ Tous les problèmes critiques corrigés: (1) Endpoints PDF backend ajoutés avec reportlab, (2) Frontend refactorisé pour utiliser PDFs au lieu de HTML/TXT, (3) Boutons d'action réparés, (4) Rapports professionnels avec branding ECO PUMP AFRIK. Prêt pour tests complets."
+    - message: "CORRECTIONS CRITIQUES IMPLÉMENTÉES ✅ (1) Logo ECO PUMP AFRIK ajouté sur tous les PDFs avec branding professionnel, (2) Boutons Paiement dans onglet Factures corrigés - formulaire de paiement réinitialisé correctement, (3) Boutons œil dans onglet Stock corrigés - affichage modal détaillé au lieu de PDF, (4) Rapports générés selon intitulé sélectionné - ajout support Journal Achats et Balance Fournisseurs. Tous problèmes utilisateur résolus."
     - agent: "testing"
     - message: "✅ TESTS COMPLETS TERMINÉS - TOUS LES ENDPOINTS PDF FONCTIONNENT PARFAITEMENT! Validation exhaustive effectuée: (1) Documents PDF: devis/facture/paiement génèrent des PDFs professionnels avec branding ECO PUMP AFRIK, (2) Rapports PDF: journal_ventes, balance_clients, tresorerie, compte_resultat tous fonctionnels avec données réelles, (3) Gestion d'erreurs: 400 pour types invalides, 404 pour documents inexistants, (4) Headers corrects: application/pdf, (5) Tailles appropriées: 2-4KB par PDF. Les boutons d'action qui affichaient 'Not Found' sont maintenant corrigés. PRÊT POUR PRODUCTION."
