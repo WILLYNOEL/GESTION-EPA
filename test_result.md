@@ -125,6 +125,9 @@ backend:
         - working: true
         - agent: "testing"
         - comment: "✅ VALIDATION FINALE CORRECTIONS CRITIQUES: Tests exhaustifs de 52 endpoints avec 98.1% de réussite. CONFIRMÉ: (1) Endpoint stock manquant PUT /api/stock/{article_id} maintenant fonctionnel avec gestion d'erreurs 404, (2) Logo ECO PUMP AFRIK amélioré présent dans tous les PDFs (3000+ bytes), (3) Mise en page PDF corrigée - colonnes fixes empêchent débordement, troncature texte longue, (4) Champs commentaires inclus dans PDFs quand présents. TOUTES les corrections prioritaires validées et opérationnelles."
+        - working: true
+        - agent: "testing"
+        - comment: "🎯 VALIDATION NOUVELLES CORRECTIONS CRITIQUES RÉUSSIE (98.5% - 66/67 tests): ✅ LOGO AVEC BORDURE VISIBLE - Documents PDF incluent logo ECO PUMP AFRIK avec bordure bleue BOX, fond gris #f8f9fa, uniquement +225 0707806359 (074857656 supprimé). ✅ EMAIL CONTACT MIS À JOUR - Tous documents PDF utilisent contact@ecopumpafrik.com. ✅ CHAMPS COMMENTAIRES - Inclus dans PDFs devis/factures quand présents. ✅ ENDPOINT STOCK PUT - Fonctionnel avec gestion erreurs 404. CORRECTIONS DOCUMENTS VALIDÉES!"
 
   - task: "Génération PDF rapports professionnels"
     implemented: true
