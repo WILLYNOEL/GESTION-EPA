@@ -569,15 +569,19 @@ async def get_stock():
 async def create_article_stock(article: ArticleStock):
     try:
         article_data = article.dict()
-        article_data["article_id"] = generate_id()
-        article_data["created_at"] = datetime.now().isoformat()
-        article_data["updated_at"] = datetime.now().isoformat()
+        current_time = datetime.now()
+        
+        # Generate article ID
+        article_data["article_id"] = str(uuid.uuid4())
+        article_data["created_at"] = current_time.isoformat()
+        article_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        article_data["updated_at"] = current_time.isoformat()
+        article_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = stock_collection.insert_one(article_data)
+        article_data["_id"] = str(result.inserted_id)
         
-        if result.inserted_id:
-            article_data["_id"] = str(result.inserted_id)
-            return {"success": True, "article": article_data}
+        return {"success": True, "article": article_data}
     except Exception as e:
         logger.error(f"Error creating article: {e}")
         raise HTTPException(status_code=500, detail=str(e))
