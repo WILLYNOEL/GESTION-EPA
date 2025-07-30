@@ -2212,6 +2212,7 @@ async def get_current_user(current_user: dict = Depends(verify_token)):
         "email": current_user.get("email"),
         "role": current_user["role"],
         "is_active": current_user["is_active"],
+        "permissions": current_user.get("permissions", {}),  # Inclure les permissions
         "last_login": current_user.get("last_login")
     }
 
