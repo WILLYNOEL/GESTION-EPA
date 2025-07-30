@@ -227,52 +227,200 @@ function App() {
     }
   };
 
-  const handleViewDocument = (type, id) => {
-    console.log(`Viewing ${type} document:`, id);
-    // TODO: Implement PDF viewer
-    alert(`Fonctionnalité de visualisation en cours de développement pour ${type}: ${id}`);
-  };
-
-  const handleDownloadDocument = (type, id) => {
-    console.log(`Downloading ${type} document:`, id);
-    // TODO: Implement PDF download
-    alert(`Fonctionnalité de téléchargement PDF en cours de développement pour ${type}: ${id}`);
-  };
-
-  const handleEditDocument = (type, id) => {
-    console.log(`Editing ${type} document:`, id);
-    alert(`Fonctionnalité d'édition en cours de développement pour ${type}: ${id}`);
-  };
-
-  const handleDeleteDocument = async (type, id) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ce ${type} ?`)) {
-      try {
-        setLoading(true);
-        await axios.delete(`${API_BASE_URL}/api/${type}/${id}`);
-        fetchAll();
-        alert(`${type} supprimé avec succès`);
-      } catch (error) {
-        console.error(`Error deleting ${type}:`, error);
-        alert(`Erreur lors de la suppression: ${error.response?.data?.detail || error.message}`);
-      } finally {
-        setLoading(false);
-      }
+  const handleViewDocument = async (type, id) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/api/${type}/${id}`);
+      const document = response.data[type] || response.data.client || response.data.fournisseur || response.data.article;
+      
+      // Create a detailed view modal
+      const details = JSON.stringify(document, null, 2);
+      const docType = type === 'facture' ? 'Facture' : 
+                     type === 'devis' ? 'Devis' : 
+                     type === 'client' ? 'Client' : 
+                     type === 'fournisseur' ? 'Fournisseur' : 
+                     type === 'stock' ? 'Article' : 'Document';
+      
+      alert(`Détails ${docType}:\n\n${JSON.stringify({
+        ID: document.client_id || document.devis_id || document.facture_id || document.fournisseur_id || document.article_id,
+        Nom: document.nom || document.client_nom || document.designation,
+        Montant: document.total_ttc ? formatCurrency(document.total_ttc, document.devise) : 'N/A',
+        Statut: document.statut || document.statut_paiement || 'Actif',
+        Date: document.created_at ? formatDate(document.created_at) : 'N/A'
+      }, null, 2)}`);
+    } catch (error) {
+      console.error(`Error viewing ${type}:`, error);
+      alert(`Erreur lors de la visualisation: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleGenerateReport = (reportType) => {
-    console.log('Generating report:', reportType);
-    alert(`Génération du rapport "${reportType}" en cours de développement. Cette fonctionnalité sera disponible prochainement.`);
+  const handleDownloadDocument = async (type, id) => {
+    try {
+      setLoading(true);
+      
+      // Simulate PDF generation
+      const response = await axios.get(`${API_BASE_URL}/api/${type.replace('recu', 'paiements')}/${id}`);
+      const document = response.data[type] || response.data.devis || response.data.facture || response.data.paiement;
+      
+      // Create downloadable content
+      const content = `ECO PUMP AFRIK - Gestion Intelligente
+      
+${type.toUpperCase()} - ${document.numero_devis || document.numero_facture || 'RECU-' + id}
+Date: ${formatDate(document.date_devis || document.date_facture || document.date_paiement)}
+Client: ${document.client_nom || 'N/A'}
+
+${type === 'devis' || type === 'facture' ? `
+Articles:
+${document.articles?.map(a => `- ${a.designation}: ${a.quantite} x ${formatCurrency(a.prix_unitaire)} = ${formatCurrency(a.total)}`).join('\n') || ''}
+
+Sous-total: ${formatCurrency(document.sous_total)}
+TVA (18%): ${formatCurrency(document.tva)}
+Total TTC: ${formatCurrency(document.total_ttc)}
+` : `
+Montant: ${formatCurrency(document.montant)}
+Mode: ${document.mode_paiement}
+Référence: ${document.reference_paiement || 'N/A'}
+`}
+
+SARL U au Capital de 1 000 000 F CFA
+Siege Social : Cocody Angré 7e Tranche
+Tel/FAX : +225 0707806359
+Email : ouanlo.ouattara@ecopumpafrik.com
+Site WEB : www.ecopumpafrik.com`;
+
+      // Create and download file
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type.toUpperCase()}_${document.numero_devis || document.numero_facture || id}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      alert(`${type.toUpperCase()} téléchargé avec succès !`);
+    } catch (error) {
+      console.error(`Error downloading ${type}:`, error);
+      alert(`Erreur lors du téléchargement: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateReport = async (reportType) => {
+    try {
+      setLoading(true);
+      
+      // Simulate report generation with real data
+      let reportData = '';
+      
+      switch (reportType) {
+        case 'Journal des Ventes':
+          reportData = `ECO PUMP AFRIK - JOURNAL DES VENTES
+Période: ${new Date().toLocaleDateString('fr-FR')}
+
+${factures.map(f => `${f.numero_facture} | ${f.client_nom} | ${formatCurrency(f.total_ttc, f.devise)} | ${f.statut_paiement}`).join('\n')}
+
+Total Factures: ${factures.length}
+Montant Total: ${formatCurrency(factures.reduce((sum, f) => sum + f.total_ttc, 0))}`;
+          break;
+          
+        case 'Balance Clients':
+          reportData = `ECO PUMP AFRIK - BALANCE CLIENTS
+Date: ${new Date().toLocaleDateString('fr-FR')}
+
+${clients.map(c => {
+            const clientFactures = factures.filter(f => f.client_id === c.client_id);
+            const totalDu = clientFactures.reduce((sum, f) => sum + (f.total_ttc - (f.montant_paye || 0)), 0);
+            return `${c.nom} | ${c.devise} | Dû: ${formatCurrency(totalDu, c.devise)}`;
+          }).join('\n')}
+
+Total Créances: ${formatCurrency(stats.montant_a_encaisser || 0)}`;
+          break;
+          
+        case 'Suivi de Trésorerie':
+          reportData = `ECO PUMP AFRIK - SUIVI DE TRÉSORERIE
+Période: ${new Date().toLocaleDateString('fr-FR')}
+
+ENTRÉES:
+${paiements.map(p => `${formatDate(p.date_paiement)} | ${formatCurrency(p.montant, p.devise)} | ${p.mode_paiement}`).join('\n')}
+
+Total Encaissé: ${formatCurrency(paiements.reduce((sum, p) => sum + p.montant, 0))}
+À Encaisser: ${formatCurrency(stats.montant_a_encaisser || 0)}`;
+          break;
+          
+        default:
+          reportData = `ECO PUMP AFRIK - ${reportType.toUpperCase()}
+Date: ${new Date().toLocaleDateString('fr-FR')}
+
+Rapport généré avec succès !
+Clients: ${stats.total_clients}
+Devis: ${stats.total_devis}
+Factures: ${stats.total_factures}`;
+      }
+      
+      // Create and download report
+      const blob = new Blob([reportData], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${reportType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      alert(`Rapport "${reportType}" généré et téléchargé avec succès !`);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert(`Erreur lors de la génération du rapport: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExportPDF = () => {
-    console.log('Exporting to PDF');
-    alert('Fonctionnalité d\'export PDF en cours de développement');
+    handleGenerateReport('Export Global PDF');
   };
 
-  const handleExportExcel = () => {
-    console.log('Exporting to Excel');
-    alert('Fonctionnalité d\'export Excel en cours de développement');
+  const handleExportExcel = async () => {
+    try {
+      setLoading(true);
+      
+      // Create CSV content (Excel compatible)
+      const csvContent = `ECO PUMP AFRIK - EXPORT DONNÉES\n
+CLIENTS:
+Nom,Email,Téléphone,Devise,Type,Date Création
+${clients.map(c => `"${c.nom}","${c.email || ''}","${c.telephone || ''}","${c.devise}","${c.type_client}","${formatDate(c.created_at)}"`).join('\n')}
+
+DEVIS:
+Numéro,Client,Montant,Statut,Date
+${devis.map(d => `"${d.numero_devis}","${d.client_nom}","${d.total_ttc}","${d.statut}","${formatDate(d.date_devis)}"`).join('\n')}
+
+FACTURES:
+Numéro,Client,Montant,Statut Paiement,Date
+${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","${f.statut_paiement}","${formatDate(f.date_facture)}"`).join('\n')}`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ECO_PUMP_AFRIK_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      alert('Export Excel (CSV) téléchargé avec succès !');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      alert(`Erreur lors de l'export: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditStock = (articleId) => {
