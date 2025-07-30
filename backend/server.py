@@ -983,29 +983,8 @@ async def generate_liste_factures(date_debut: str = None, date_fin: str = None):
             story = []
             styles = getSampleStyleSheet()
             
-            # Professional logo header (same as above)
-            logo_table_data = [
-                ["", "ECO PUMP AFRIK", ""],
-                ["", "Solutions Hydrauliques Professionnelles", ""]
-            ]
-            
-            logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
-            logo_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
-                ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (1, 0), (1, 0), 28),
-                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
-                ('ALIGN', (1, 0), (1, 0), 'CENTER'),
-                ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
-                ('FONTSIZE', (1, 1), (1, 1), 14),
-                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
-                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-                ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
-                ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
-                ('TOPPADDING', (0, 0), (-1, -1), 15),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
-            ]))
-            
+            # Professional logo header with actual logo
+            logo_table = create_pdf_header_with_logo()
             story.append(logo_table)
             story.append(Spacer(1, 10))
             
