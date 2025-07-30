@@ -2071,7 +2071,11 @@ function App() {
                   <CardDescription>Historique des achats fournisseurs</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Journal des Achats')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
@@ -2084,7 +2088,11 @@ function App() {
                   <CardDescription>Soldes et créances clients</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Balance Clients')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
@@ -2097,7 +2105,11 @@ function App() {
                   <CardDescription>Soldes et dettes fournisseurs</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Balance Fournisseurs')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
@@ -2110,7 +2122,11 @@ function App() {
                   <CardDescription>Entrées et sorties de fonds</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Suivi de Trésorerie')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
@@ -2123,7 +2139,11 @@ function App() {
                   <CardDescription>Bénéfices et pertes</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Compte de Résultat')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
