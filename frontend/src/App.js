@@ -1660,6 +1660,9 @@ ECO PUMP AFRIK - Tous droits réservés`;
                         <div>
                           <p className="font-medium text-sm">{d.numero_devis}</p>
                           <p className="text-xs text-muted-foreground">{d.client_nom}</p>
+                          <p className="text-xs text-blue-600 font-medium">
+                            📅 {d.created_at_formatted || formatDate(d.created_at)}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium">{formatCurrency(d.total_ttc, d.devise)}</p>
