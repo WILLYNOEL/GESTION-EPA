@@ -979,25 +979,33 @@ async def generate_report_pdf(report_type: str):
                 story.append(table)
                 story.append(Spacer(1, 20))
                 
-                # Detailed factures table
+                # Detailed factures table with fixed column widths
                 story.append(Paragraph("Détail des Factures", styles['Heading2']))
-                facture_data = [["N° Facture", "Client", "Date", "Montant TTC", "Statut"]]
+                facture_data = [["N° Facture", "Client", "Date", "Montant", "Statut"]]
                 for f in factures_data[:15]:  # Limit to 15 recent invoices
+                    # Truncate long client names
+                    client_nom = f.get('client_nom', '')
+                    if len(client_nom) > 20:
+                        client_nom = client_nom[:20] + "..."
+                    
                     facture_data.append([
-                        f.get('numero_facture', ''),
-                        f.get('client_nom', ''),
-                        f.get('date_facture', ''),
-                        f"{f.get('total_ttc', 0):,.2f} {f.get('devise', 'FCFA')}",
+                        f.get('numero_facture', '')[:15],  # Limit invoice number
+                        client_nom,
+                        f.get('date_facture', '')[:10],  # Date only, no time
+                        f"{f.get('total_ttc', 0):,.0f} {f.get('devise', 'FCFA')}",
                         f.get('statut_paiement', '')
                     ])
                 
-                detail_table = Table(facture_data)
+                detail_table = Table(facture_data, colWidths=[80, 120, 60, 80, 60])
                 detail_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#28a745')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Left align client names
+                    ('ALIGN', (3, 1), (3, -1), 'RIGHT'), # Right align amounts
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 9),
+                    ('FONTSIZE', (0, 1), (-1, -1), 8),
                     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
                     ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
                     ('GRID', (0, 0), (-1, -1), 1, colors.black)
