@@ -815,6 +815,13 @@ def main():
     test_results.append(tester.test_pdf_content_headers())
     test_results.append(tester.test_pdf_with_real_data())
     
+    # CRITICAL NEW TESTS - Testing user-reported fixes
+    print("\n" + "=" * 50)
+    print("🚨 TESTING USER-REPORTED CORRECTIONS")
+    print("=" * 50)
+    test_results.append(tester.test_eco_pump_afrik_branding())
+    test_results.append(tester.test_new_report_endpoints_specifically())
+    
     # Print final results
     print("\n" + "=" * 50)
     print(f"📊 FINAL RESULTS")
