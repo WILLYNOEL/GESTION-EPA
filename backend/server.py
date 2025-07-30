@@ -210,56 +210,53 @@ def get_logo_image():
         return None
 
 def create_pdf_header_with_logo():
-    """Create standardized PDF header with ECO PUMP AFRIK logo"""
+    """Create standardized PDF header with ECO PUMP AFRIK logo - CENTERED"""
     logo_img = get_logo_image()
     
     if logo_img:
-        # Header with actual logo - FOND BLANC au lieu de bleu
+        # Header with actual logo - CENTRÉ avec colWidths équilibrées
         logo_table_data = [
             [logo_img, "ECO PUMP AFRIK", ""],
             ["", "Solutions Hydrauliques Professionnelles", ""]
         ]
         
-        # Augmentation de la largeur pour le logo plus grand (80 -> 120)
-        logo_table = Table(logo_table_data, colWidths=[120, 340, 80])
+        # Colonne de gauche et droite égales pour centrer le logo et le texte
+        logo_table = Table(logo_table_data, colWidths=[120, 360, 120])
         logo_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-            ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),  # Logo centré
+            ('VALIGN', (0, 0), (0, 0), 'MIDDLE'), # Logo au milieu verticalement
+            ('ALIGN', (1, 0), (1, 1), 'CENTER'),  # Texte centré horizontalement
+            ('VALIGN', (1, 0), (1, 1), 'MIDDLE'), # Texte centré verticalement
             # FOND BLANC au lieu de bleu comme demandé
-            ('BACKGROUND', (0, 0), (0, 1), colors.white),
+            ('BACKGROUND', (0, 0), (2, 1), colors.white),
             ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (1, 0), (1, 0), 28),
+            ('FONTSIZE', (1, 0), (1, 0), 26),  # Légèrement réduit pour laisser place au logo
             ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
-            ('ALIGN', (1, 0), (1, 0), 'CENTER'),
             ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
-            ('FONTSIZE', (1, 1), (1, 1), 14),
+            ('FONTSIZE', (1, 1), (1, 1), 12),
             ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
-            ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-            # Fond blanc aussi pour la cellule de droite
-            ('BACKGROUND', (2, 0), (2, 1), colors.white),
             ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
             ('TOPPADDING', (0, 0), (-1, -1), 15),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
         ]))
     else:
-        # Fallback to text-based header
+        # Fallback to text-based header - CENTRÉ
         logo_table_data = [
             ["", "ECO PUMP AFRIK", ""],
             ["", "Solutions Hydrauliques Professionnelles", ""]
         ]
         
-        logo_table = Table(logo_table_data, colWidths=[80, 360, 80])  
+        logo_table = Table(logo_table_data, colWidths=[120, 360, 120])  
         logo_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, 1), colors.white),  # Fond blanc ici aussi
+            ('BACKGROUND', (0, 0), (2, 1), colors.white),  # Fond blanc partout
             ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (1, 0), (1, 0), 28),
             ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
-            ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+            ('ALIGN', (1, 0), (1, 1), 'CENTER'),  # Tout centré
+            ('VALIGN', (1, 0), (1, 1), 'MIDDLE'),
             ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
             ('FONTSIZE', (1, 1), (1, 1), 14),
             ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
-            ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-            ('BACKGROUND', (2, 0), (2, 1), colors.white),  # Fond blanc ici aussi
             ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
             ('TOPPADDING', (0, 0), (-1, -1), 15),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
