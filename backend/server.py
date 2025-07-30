@@ -981,8 +981,11 @@ async def generate_report_pdf(report_type: str, date_debut: str = None, date_fin
             title_style.textColor = colors.HexColor('#333333')
             
             if report_type == "journal_ventes":
-                story.append(Paragraph("JOURNAL DES VENTES", title_style))
-                story.append(Paragraph(f"Période: {date.today().strftime('%B %Y')}", styles['Normal']))
+                period_text = ""
+                if date_debut and date_fin:
+                    period_text = f" - Période: {date_debut} au {date_fin}"
+                
+                story.append(Paragraph(f"JOURNAL DES VENTES{period_text}", title_style))
                 story.append(Spacer(1, 20))
                 
                 # Sales summary table
