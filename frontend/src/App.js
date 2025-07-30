@@ -30,7 +30,11 @@ function App() {
   const [paiements, setPaiements] = useState([]);
   const [stats, setStats] = useState({});
   const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // Rapport filters state
+  const [rapportFilters, setRapportFilters] = useState({
+    date_debut: '',
+    date_fin: ''
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState({});
   
