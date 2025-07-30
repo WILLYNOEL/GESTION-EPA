@@ -11,7 +11,7 @@ class EcoPumpAfrikAPITester:
         self.created_client_id = None
         self.created_devis_id = None
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, params=None, expect_pdf=False):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
@@ -34,26 +34,40 @@ class EcoPumpAfrikAPITester:
             if success:
                 self.tests_passed += 1
                 print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    response_data = response.json()
-                    if method == 'POST' and 'client' in response_data:
-                        print(f"   Response: Client created with ID {response_data['client']['client_id']}")
-                    elif method == 'POST' and 'devis' in response_data:
-                        print(f"   Response: Devis created with number {response_data['devis']['numero_devis']}")
-                    elif method == 'GET' and 'clients' in response_data:
-                        print(f"   Response: Found {len(response_data['clients'])} clients")
-                    elif method == 'GET' and 'devis' in response_data:
-                        print(f"   Response: Found {len(response_data['devis'])} devis")
-                    elif method == 'GET' and 'stats' in response_data:
-                        stats = response_data['stats']
-                        print(f"   Response: {stats['total_clients']} clients, {stats['total_devis']} devis, {stats['montant_devis_mois']} FCFA this month")
-                except:
-                    print(f"   Response: {response.text[:100]}...")
+                
+                if expect_pdf:
+                    # Handle PDF response
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        print(f"   Response: PDF file ({len(response.content)} bytes)")
+                        return success, {"pdf_size": len(response.content)}
+                    else:
+                        print(f"   Response: Unexpected content-type: {content_type}")
+                        return success, {}
+                else:
+                    # Handle JSON response
+                    try:
+                        response_data = response.json()
+                        if method == 'POST' and 'client' in response_data:
+                            print(f"   Response: Client created with ID {response_data['client']['client_id']}")
+                        elif method == 'POST' and 'devis' in response_data:
+                            print(f"   Response: Devis created with number {response_data['devis']['numero_devis']}")
+                        elif method == 'GET' and 'clients' in response_data:
+                            print(f"   Response: Found {len(response_data['clients'])} clients")
+                        elif method == 'GET' and 'devis' in response_data:
+                            print(f"   Response: Found {len(response_data['devis'])} devis")
+                        elif method == 'GET' and 'stats' in response_data:
+                            stats = response_data['stats']
+                            print(f"   Response: {stats['total_clients']} clients, {stats['total_devis']} devis, {stats['montant_devis_mois']} FCFA this month")
+                        return success, response_data
+                    except:
+                        print(f"   Response: {response.text[:100]}...")
+                        return success, {}
             else:
                 print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 print(f"   Response: {response.text[:200]}...")
 
-            return success, response.json() if response.text else {}
+            return success, response.json() if response.text and not expect_pdf else {}
 
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
