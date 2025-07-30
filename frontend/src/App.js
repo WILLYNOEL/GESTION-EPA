@@ -2054,7 +2054,11 @@ function App() {
                   <CardDescription>Historique détaillé des ventes</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleGenerateReport('Journal des Ventes')}
+                  >
                     Générer le rapport
                   </Button>
                 </CardContent>
