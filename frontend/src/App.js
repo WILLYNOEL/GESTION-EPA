@@ -1041,57 +1041,74 @@ ECO PUMP AFRIK - Tous droits réservés`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Professional Header */}
+      <header className="bg-white shadow-lg border-b-4 border-blue-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                <Package className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">ECO PUMP AFRIK</h1>
-                <p className="text-sm text-slate-600">Gestion Intelligente</p>
+                <h1 className="text-3xl font-bold text-gray-900">ECO PUMP AFRIK</h1>
+                <p className="text-sm text-blue-600 font-medium">Solutions Hydrauliques Professionnelles</p>
               </div>
             </div>
-            
-            {/* Search Bar */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher client, devis, facture..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 w-64"
-                />
+            <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>{clients.length} clients</span>
               </div>
-              <Button onClick={handleSearch} size="sm">
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="text-right">
-              <p className="text-sm text-slate-600">Cocody - Angré 7e Tranche</p>
-              <p className="text-sm text-slate-600">+225 0707806359</p>
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span>{factures.length} factures</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Package className="h-4 w-4" />
+                <span>{stock.length} articles</span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-[800px]">
-            <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
-            <TabsTrigger value="fournisseurs">Fournisseurs</TabsTrigger>
-            <TabsTrigger value="devis">Devis</TabsTrigger>
-            <TabsTrigger value="factures">Factures</TabsTrigger>
-            <TabsTrigger value="stock">Stock</TabsTrigger>
-            <TabsTrigger value="paiements">Paiements</TabsTrigger>
-            <TabsTrigger value="rapports">Rapports</TabsTrigger>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {/* Modern Navigation Tabs */}
+          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-8 bg-white rounded-lg shadow-md p-1 border border-gray-200">
+            <TabsTrigger value="dashboard" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Tableau de Bord</span>
+            </TabsTrigger>
+            <TabsTrigger value="clients" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Clients</span>
+            </TabsTrigger>
+            <TabsTrigger value="fournisseurs" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Fournisseurs</span>
+            </TabsTrigger>
+            <TabsTrigger value="devis" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Devis</span>
+            </TabsTrigger>
+            <TabsTrigger value="factures" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Factures</span>
+            </TabsTrigger>
+            <TabsTrigger value="stock" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Stock</span>
+            </TabsTrigger>
+            <TabsTrigger value="paiements" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Paiements</span>
+            </TabsTrigger>
+            <TabsTrigger value="rapports" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Rapports</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Search Results */}
