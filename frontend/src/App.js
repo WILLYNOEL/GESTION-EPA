@@ -2062,12 +2062,19 @@ ECO PUMP AFRIK - Tous droits réservés`;
                       </div>
                       <div>
                         <Label htmlFor="conditions_paiement">Conditions de paiement</Label>
-                        <Input
-                          id="conditions_paiement"
-                          value={devisForm.conditions_paiement}
-                          onChange={(e) => setDevisForm({ ...devisForm, conditions_paiement: e.target.value })}
-                          placeholder="Ex: 30% à la commande, 70% à la livraison"
-                        />
+                        <Select value={devisForm.conditions_paiement} onValueChange={(value) => setDevisForm({ ...devisForm, conditions_paiement: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner les conditions" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="A définir entre nous">À définir entre nous</SelectItem>
+                            <SelectItem value="60% à la commande, solde avant la livraison">60% à la commande, solde avant la livraison</SelectItem>
+                            <SelectItem value="100% à la commande">100% à la commande</SelectItem>
+                            <SelectItem value="30 Jours date facture">30 Jours date facture</SelectItem>
+                            <SelectItem value="Paiement à la livraison">Paiement à la livraison</SelectItem>
+                            <SelectItem value="50% à la commande, 50% à la livraison">50% à la commande, 50% à la livraison</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="devis_mode_livraison">Mode de livraison</Label>
