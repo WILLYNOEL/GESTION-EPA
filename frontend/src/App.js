@@ -852,7 +852,42 @@ ${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","$
             </Card>
           )}
 
-          {/* Dashboard Tab */}
+          {/* Smart Alerts System */}
+          {smartAlerts.length > 0 && (
+            <div className="mb-6 space-y-3">
+              {smartAlerts.map((alert, index) => (
+                <Alert 
+                  key={index} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    alert.type === 'error' ? 'border-red-200 bg-red-50' :
+                    alert.type === 'warning' ? 'border-orange-200 bg-orange-50' :
+                    alert.type === 'success' ? 'border-green-200 bg-green-50' :
+                    'border-blue-200 bg-blue-50'
+                  }`}
+                  onClick={alert.action}
+                >
+                  <AlertTriangle className={`h-4 w-4 ${
+                    alert.type === 'error' ? 'text-red-600' :
+                    alert.type === 'warning' ? 'text-orange-600' :
+                    alert.type === 'success' ? 'text-green-600' :
+                    'text-blue-600'
+                  }`} />
+                  <div>
+                    <AlertDescription className={`font-medium ${
+                      alert.type === 'error' ? 'text-red-800' :
+                      alert.type === 'warning' ? 'text-orange-800' :
+                      alert.type === 'success' ? 'text-green-800' :
+                      'text-blue-800'
+                    }`}>
+                      <span className="font-bold">{alert.title}:</span> {alert.message}
+                    </AlertDescription>
+                  </div>
+                </Alert>
+              ))}
+            </div>
+          )}
+
+          {/* Dashboard Tab with enhanced design */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* Alerts */}
             {alerts.length > 0 && (
