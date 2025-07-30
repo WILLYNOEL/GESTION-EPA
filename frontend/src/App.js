@@ -1215,13 +1215,25 @@ function App() {
                           <TableCell>{formatDate(fournisseur.created_at)}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewDocument('fournisseur', fournisseur.fournisseur_id)}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditFournisseur(fournisseur.fournisseur_id)}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteFournisseur(fournisseur.fournisseur_id)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
