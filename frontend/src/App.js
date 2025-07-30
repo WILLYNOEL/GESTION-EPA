@@ -426,20 +426,71 @@ ${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","$
   const handleEditStock = (articleId) => {
     const article = stock.find(a => a.article_id === articleId);
     if (article) {
-      setStockForm(article);
+      setStockForm({
+        ref: article.ref,
+        designation: article.designation,
+        quantite_stock: article.quantite_stock,
+        stock_minimum: article.stock_minimum,
+        prix_achat_moyen: article.prix_achat_moyen,
+        prix_vente: article.prix_vente,
+        fournisseur_principal: article.fournisseur_principal || '',
+        emplacement: article.emplacement || ''
+      });
       setIsStockDialogOpen(true);
     }
   };
 
-  const handleStockMovement = (articleId) => {
-    console.log('Stock movement for article:', articleId);
-    alert('Fonctionnalité de mouvement de stock en cours de développement');
+  const handleStockMovement = async (articleId) => {
+    const article = stock.find(a => a.article_id === articleId);
+    if (!article) return;
+    
+    const movement = prompt(`Mouvement de stock pour "${article.designation}":\n\nQuantité actuelle: ${article.quantite_stock}\nStock minimum: ${article.stock_minimum}\n\nEntrez la quantité à ajouter (+) ou retirer (-):`, '0');
+    
+    if (movement !== null && !isNaN(movement) && movement !== '0') {
+      try {
+        setLoading(true);
+        const newQuantity = parseFloat(article.quantite_stock) + parseFloat(movement);
+        
+        if (newQuantity < 0) {
+          alert('Impossible: Stock ne peut pas être négatif');
+          return;
+        }
+        
+        // Update stock quantity (simulated)
+        await axios.put(`${API_BASE_URL}/api/stock/${articleId}`, {
+          ...article,
+          quantite_stock: newQuantity
+        });
+        
+        fetchAll();
+        
+        const alertMsg = newQuantity <= article.stock_minimum ? 
+          `⚠️ ALERTE: Stock mis à jour ! Nouveau stock: ${newQuantity} (En dessous du minimum: ${article.stock_minimum})` :
+          `✅ Stock mis à jour avec succès ! Nouveau stock: ${newQuantity}`;
+        
+        alert(alertMsg);
+      } catch (error) {
+        console.error('Error updating stock:', error);
+        alert(`Erreur lors de la mise à jour du stock: ${error.response?.data?.detail || error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const handleEditFournisseur = (fournisseurId) => {
     const fournisseur = fournisseurs.find(f => f.fournisseur_id === fournisseurId);
     if (fournisseur) {
-      setFournisseurForm(fournisseur);
+      setFournisseurForm({
+        nom: fournisseur.nom,
+        numero_cc: fournisseur.numero_cc || '',
+        numero_rc: fournisseur.numero_rc || '',
+        email: fournisseur.email || '',
+        telephone: fournisseur.telephone || '',
+        adresse: fournisseur.adresse || '',
+        devise: fournisseur.devise,
+        conditions_paiement: fournisseur.conditions_paiement || ''
+      });
       setIsFournisseurDialogOpen(true);
     }
   };
@@ -450,15 +501,68 @@ ${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","$
         setLoading(true);
         await axios.delete(`${API_BASE_URL}/api/fournisseurs/${fournisseurId}`);
         fetchAll();
-        alert('Fournisseur supprimé avec succès');
+        alert('✅ Fournisseur supprimé avec succès');
       } catch (error) {
         console.error('Error deleting fournisseur:', error);
-        alert('Erreur lors de la suppression: ' + (error.response?.data?.detail || error.message));
+        alert(`❌ Erreur lors de la suppression: ${error.response?.data?.detail || error.message}`);
       } finally {
         setLoading(false);
       }
     }
   };
+
+  // Système d'alertes automatiques intelligentes
+  const generateSmartAlerts = () => {
+    const alertsArray = [];
+    
+    // Alertes Stock Bas
+    if (alerts.length > 0) {
+      alertsArray.push({
+        type: 'warning',
+        title: 'Stock Critique',
+        message: `${alerts.length} article(s) en stock bas nécessitent votre attention`,
+        action: () => setActiveTab('stock')
+      });
+    }
+    
+    // Alertes Factures Impayées
+    const facturesImpayes = factures.filter(f => f.statut_paiement === 'impayé');
+    if (facturesImpayes.length > 0) {
+      alertsArray.push({
+        type: 'error',
+        title: 'Factures Impayées',
+        message: `${facturesImpayes.length} facture(s) impayée(s) - ${formatCurrency(stats.montant_a_encaisser || 0)}`,
+        action: () => setActiveTab('factures')
+      });
+    }
+    
+    // Alertes Devis en Attente
+    const devisEnAttente = devis.filter(d => d.statut === 'envoyé');
+    if (devisEnAttente.length > 0) {
+      alertsArray.push({
+        type: 'info',
+        title: 'Devis en Attente',
+        message: `${devisEnAttente.length} devis en attente de réponse client`,
+        action: () => setActiveTab('devis')
+      });
+    }
+    
+    // Alertes Performance Mensuelle
+    const currentMonth = new Date().getMonth();
+    const thisMonthFactures = factures.filter(f => new Date(f.date_facture).getMonth() === currentMonth);
+    if (thisMonthFactures.length > 5) {
+      alertsArray.push({
+        type: 'success',
+        title: 'Performance Excellent',
+        message: `🎉 ${thisMonthFactures.length} factures ce mois ! Excellent travail !`,
+        action: () => setActiveTab('rapports')
+      });
+    }
+    
+    return alertsArray;
+  };
+
+  const smartAlerts = generateSmartAlerts();
 
   // Fournisseur form handlers
   const handleFournisseurSubmit = async (e) => {
