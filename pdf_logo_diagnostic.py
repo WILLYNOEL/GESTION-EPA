@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 class EcoPumpAfrikLogoDiagnostic:
-    def __init__(self, base_url="https://4b33f187-d246-4fb0-9666-69f078e7f34c.preview.emergentagent.com"):
+    def __init__(self, base_url="https://28553b55-afa1-45fb-8eb3-dcbd020d939a.preview.emergentagent.com"):
         self.base_url = base_url
         
     def create_test_data(self):

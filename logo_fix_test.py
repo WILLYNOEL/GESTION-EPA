@@ -109,7 +109,7 @@ def test_backend_pdf_generation():
     """Test the actual backend PDF generation"""
     print("\n🔍 Testing backend PDF generation...")
     
-    base_url = "https://4b33f187-d246-4fb0-9666-69f078e7f34c.preview.emergentagent.com"
+    base_url = "https://28553b55-afa1-45fb-8eb3-dcbd020d939a.preview.emergentagent.com"
     
     # Test a simple report
     try:
