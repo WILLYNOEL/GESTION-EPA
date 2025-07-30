@@ -889,8 +889,8 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             story.append(Paragraph("─" * 80, footer_style))
             story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
             story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
-            story.append(Paragraph("Tél: +225 0748576956 / +225 0707806359", footer_style))
-            story.append(Paragraph("Email: ouanlo.ouattara@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            story.append(Paragraph("Tél: +225 0707806359", footer_style))
+            story.append(Paragraph("Email: contact@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
             story.append(Paragraph("RCCM: CI-ABJ-2024-B-12345 | N°CC: 2407891H", footer_style))
             
             doc.build(story)
