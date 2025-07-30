@@ -578,8 +578,6 @@ async def create_article_stock(article: ArticleStock):
         if result.inserted_id:
             article_data["_id"] = str(result.inserted_id)
             return {"success": True, "article": article_data}
-        else:
-            raise HTTPException(status_code=500, detail="Erreur lors de la création de l'article")
     except Exception as e:
         logger.error(f"Error creating article: {e}")
         raise HTTPException(status_code=500, detail=str(e))
