@@ -767,38 +767,38 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             header_style.textColor = colors.HexColor('#0066cc')
             header_style.alignment = 1  # Center alignment
             
-            # Create ECO PUMP AFRIK branded header with ASCII-compatible symbols
-            header_table_data = [
-                ["[ECO]", "ECO PUMP AFRIK", "contact@ecopumpafrik.com"],
-                ["[PUMP]", "Solutions Hydrauliques Professionnelles", "+225 0707806359"],
-                ["[TECH]", "Gestion Intelligente", "www.ecopumpafrik.com"]
+            # Create PROFESSIONAL ECO PUMP AFRIK logo header
+            # Create a single large title with professional styling
+            logo_paragraph = Paragraph(
+                "<b>ECO PUMP AFRIK</b><br/><i>Solutions Hydrauliques Professionnelles</i>", 
+                styles['Title']
+            )
+            logo_paragraph.style.fontSize = 28
+            logo_paragraph.style.textColor = colors.HexColor('#0066cc')
+            logo_paragraph.style.alignment = 1  # Center
+            logo_paragraph.style.spaceAfter = 10
+            
+            story.append(logo_paragraph)
+            
+            # Professional contact bar
+            contact_data = [
+                ["📧 contact@ecopumpafrik.com", "📞 +225 0707806359", "🌐 www.ecopumpafrik.com"]
             ]
             
-            header_table = Table(header_table_data, colWidths=[50, 280, 150])
-            header_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (0, -1), 12),  # Symbols column
-                ('FONTSIZE', (1, 0), (1, 0), 24),   # Company name - BIGGER
-                ('FONTSIZE', (1, 1), (1, -1), 10), # Subtitle and tagline
-                ('FONTSIZE', (2, 0), (2, -1), 8),  # Contact info
-                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#0066cc')),  # Blue symbols
-                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#0066cc')),  # Company name blue
-                ('TEXTCOLOR', (1, 1), (1, -1), colors.HexColor('#444444')), # Dark text
-                ('TEXTCOLOR', (2, 0), (2, -1), colors.HexColor('#333333')), # Contact dark
-                ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # Center symbols
-                ('ALIGN', (1, 0), (1, -1), 'LEFT'),    # Left align company info
-                ('ALIGN', (2, 0), (2, -1), 'RIGHT'),   # Right align contact
+            contact_table = Table(contact_data, colWidths=[160, 160, 160])
+            contact_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 8),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-                ('TOPPADDING', (0, 0), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-                ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0066cc')),  # THICK border
-                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e6f2ff')),  # Light blue background
-                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#0066cc')),  # Internal grid
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0f8ff')),
+                ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0066cc')),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
             ]))
             
-            story.append(header_table)
+            story.append(contact_table)
             story.append(Spacer(1, 20))
             
             # Document title
