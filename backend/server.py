@@ -1388,6 +1388,185 @@ async def generate_report_pdf(report_type: str, date_debut: str = None, date_fin
         raise HTTPException(status_code=500, detail=f"Erreur lors de la génération du rapport: {str(e)}")
 
 # ========================================
+# ADVANCED SEARCH AND FILTERING ENDPOINTS
+# ========================================
+
+@app.get("/api/search/devis", response_model=dict)
+async def search_devis(
+    client_nom: str = None,
+    numero_devis: str = None,
+    date_debut: str = None,
+    date_fin: str = None,
+    devise: str = None,
+    statut: str = None,
+    limit: int = 50
+):
+    """Advanced search for devis with multiple filters"""
+    try:
+        query = {}
+        
+        # Text search filters
+        if client_nom:
+            query["client_nom"] = {"$regex": client_nom, "$options": "i"}
+        if numero_devis:
+            query["numero_devis"] = {"$regex": numero_devis, "$options": "i"}
+        if devise:
+            query["devise"] = devise
+        if statut:
+            query["statut"] = statut
+            
+        # Date range filter
+        if date_debut or date_fin:
+            date_filter = {}
+            if date_debut:
+                date_filter["$gte"] = date_debut
+            if date_fin:
+                date_filter["$lte"] = date_fin
+            query["date_devis"] = date_filter
+        
+        devis_list = list(devis_collection.find(query).sort("created_at", -1).limit(limit))
+        for devis in devis_list:
+            devis["_id"] = str(devis["_id"])
+        
+        return {
+            "success": True,
+            "devis": devis_list,
+            "count": len(devis_list),
+            "filters_applied": query
+        }
+    except Exception as e:
+        logger.error(f"Error searching devis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/search/factures", response_model=dict)
+async def search_factures(
+    client_nom: str = None,
+    numero_facture: str = None,
+    date_debut: str = None,
+    date_fin: str = None,
+    statut_paiement: str = None,
+    devise: str = None,
+    montant_min: float = None,
+    montant_max: float = None,
+    limit: int = 50
+):
+    """Advanced search for factures with multiple filters"""
+    try:
+        query = {}
+        
+        # Text search filters
+        if client_nom:
+            query["client_nom"] = {"$regex": client_nom, "$options": "i"}
+        if numero_facture:
+            query["numero_facture"] = {"$regex": numero_facture, "$options": "i"}
+        if statut_paiement:
+            query["statut_paiement"] = statut_paiement
+        if devise:
+            query["devise"] = devise
+            
+        # Date range filter
+        if date_debut or date_fin:
+            date_filter = {}
+            if date_debut:
+                date_filter["$gte"] = date_debut
+            if date_fin:
+                date_filter["$lte"] = date_fin
+            query["date_facture"] = date_filter
+            
+        # Amount range filter
+        if montant_min is not None or montant_max is not None:
+            amount_filter = {}
+            if montant_min is not None:
+                amount_filter["$gte"] = montant_min
+            if montant_max is not None:
+                amount_filter["$lte"] = montant_max
+            query["total_ttc"] = amount_filter
+        
+        factures_list = list(factures_collection.find(query).sort("created_at", -1).limit(limit))
+        for facture in factures_list:
+            facture["_id"] = str(facture["_id"])
+        
+        return {
+            "success": True,
+            "factures": factures_list,
+            "count": len(factures_list),
+            "filters_applied": query
+        }
+    except Exception as e:
+        logger.error(f"Error searching factures: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/search/clients", response_model=dict)
+async def search_clients(
+    nom: str = None,
+    type_client: str = None,
+    devise: str = None,
+    ville: str = None,
+    limit: int = 50
+):
+    """Advanced search for clients"""
+    try:
+        query = {}
+        
+        if nom:
+            query["nom"] = {"$regex": nom, "$options": "i"}
+        if type_client:
+            query["type_client"] = type_client
+        if devise:
+            query["devise"] = devise
+        if ville:
+            query["adresse"] = {"$regex": ville, "$options": "i"}
+        
+        clients_list = list(clients_collection.find(query).sort("created_at", -1).limit(limit))
+        for client in clients_list:
+            client["_id"] = str(client["_id"])
+        
+        return {
+            "success": True,
+            "clients": clients_list,
+            "count": len(clients_list),
+            "filters_applied": query
+        }
+    except Exception as e:
+        logger.error(f"Error searching clients: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/search/stock", response_model=dict)
+async def search_stock(
+    designation: str = None,
+    ref: str = None,
+    stock_bas: bool = None,
+    fournisseur: str = None,
+    limit: int = 50
+):
+    """Advanced search for stock items"""
+    try:
+        query = {}
+        
+        if designation:
+            query["designation"] = {"$regex": designation, "$options": "i"}
+        if ref:
+            query["ref"] = {"$regex": ref, "$options": "i"}
+        if fournisseur:
+            query["fournisseur_principal"] = {"$regex": fournisseur, "$options": "i"}
+        if stock_bas:
+            query["$expr"] = {"$lte": ["$quantite_stock", "$stock_minimum"]}
+        
+        stock_list = list(stock_collection.find(query).sort("created_at", -1).limit(limit))
+        for article in stock_list:
+            article["_id"] = str(article["_id"])
+        
+        return {
+            "success": True,
+            "stock": stock_list,
+            "count": len(stock_list),
+            "filters_applied": query
+        }
+    except Exception as e:
+        logger.error(f"Error searching stock: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========================================
 # SEARCH ENDPOINTS
 # ========================================
 @app.get("/api/search", response_model=dict)
