@@ -18,13 +18,28 @@ const AdminUsers = ({ token }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [editingPermissions, setEditingPermissions] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     email: '',
     role: 'user'
   });
+
+  // Permissions disponibles
+  const availablePermissions = [
+    { key: 'dashboard', label: 'Tableau de Bord', icon: '📊' },
+    { key: 'clients', label: 'Clients', icon: '👥' },
+    { key: 'fournisseurs', label: 'Fournisseurs', icon: '🏢' },
+    { key: 'devis', label: 'Devis', icon: '📋' },
+    { key: 'factures', label: 'Factures', icon: '🧾' },
+    { key: 'stock', label: 'Stock', icon: '📦' },
+    { key: 'paiements', label: 'Paiements', icon: '💳' },
+    { key: 'rapports', label: 'Rapports', icon: '📈' },
+    { key: 'administration', label: 'Administration', icon: '⚙️' }
+  ];
 
   useEffect(() => {
     fetchUsers();
