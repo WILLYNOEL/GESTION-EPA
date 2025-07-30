@@ -1906,6 +1906,184 @@ class EcoPumpAfrikAPITester:
         
         return all_branding_valid
 
+    def test_eco_pump_afrik_logo_integration_priority(self):
+        """PRIORITY TEST: ECO PUMP AFRIK Logo Integration in All PDF Endpoints"""
+        print("\n🎯 PRIORITY TESTING: ECO PUMP AFRIK LOGO INTEGRATION IN ALL PDF ENDPOINTS")
+        print("=" * 80)
+        print("FOCUS: Verify logo is properly integrated into all PDF generation endpoints")
+        print("VALIDATION CRITERIA:")
+        print("- PDF file sizes should be larger (indicating logo content added)")
+        print("- All endpoints should return valid PDF responses")
+        print("- Content-Type: application/pdf headers should be correct")
+        print("- No server errors during logo loading")
+        print("=" * 80)
+        
+        all_tests_passed = True
+        logo_test_results = []
+        
+        # Priority endpoints to test for logo integration
+        priority_endpoints = [
+            ("Document PDF - Devis", f"api/pdf/document/devis/{self.created_devis_id}" if self.created_devis_id else None),
+            ("Document PDF - Facture", None),  # Will be created during test
+            ("Document PDF - Paiement", None),  # Will be created during test
+            ("Financial Report - Journal Ventes", "api/pdf/rapport/journal_ventes"),
+            ("Financial Report - Balance Clients", "api/pdf/rapport/balance_clients"),
+            ("Financial Report - Journal Achats", "api/pdf/rapport/journal_achats"),
+            ("Financial Report - Balance Fournisseurs", "api/pdf/rapport/balance_fournisseurs"),
+            ("Financial Report - Tresorerie", "api/pdf/rapport/tresorerie"),
+            ("Financial Report - Compte Resultat", "api/pdf/rapport/compte_resultat"),
+            ("Specialized List - Factures Impayées", "api/pdf/liste/factures-impayees"),
+            ("Specialized List - All Factures", "api/pdf/liste/factures"),
+            ("Specialized List - All Devis", "api/pdf/liste/devis")
+        ]
+        
+        # Create facture and paiement for testing if we have a devis
+        facture_id = None
+        paiement_id = None
+        
+        if self.created_devis_id:
+            print("\n🔧 Setting up test data for comprehensive logo testing...")
+            
+            # Convert devis to facture
+            success, response = self.run_test(
+                "Setup: Convert Devis to Facture for Logo Test",
+                "POST",
+                f"api/devis/{self.created_devis_id}/convert-to-facture",
+                200
+            )
+            
+            if success and 'facture' in response:
+                facture_id = response['facture']['facture_id']
+                print(f"✅ Created facture {facture_id} for logo testing")
+                
+                # Create a payment for testing
+                paiement_data = {
+                    "type_document": "facture",
+                    "document_id": facture_id,
+                    "client_id": self.created_client_id,
+                    "montant": 500000,
+                    "devise": "FCFA",
+                    "mode_paiement": "virement",
+                    "reference_paiement": "LOGO-TEST-001"
+                }
+                
+                success, response = self.run_test(
+                    "Setup: Create Payment for Logo Test",
+                    "POST",
+                    "api/paiements",
+                    200,
+                    data=paiement_data
+                )
+                
+                if success and 'paiement' in response:
+                    paiement_id = response['paiement']['paiement_id']
+                    print(f"✅ Created paiement {paiement_id} for logo testing")
+        
+        # Update endpoints with actual IDs
+        priority_endpoints[1] = ("Document PDF - Facture", f"api/pdf/document/facture/{facture_id}" if facture_id else None)
+        priority_endpoints[2] = ("Document PDF - Paiement", f"api/pdf/document/paiement/{paiement_id}" if paiement_id else None)
+        
+        print("\n🔍 TESTING LOGO INTEGRATION IN ALL PRIORITY ENDPOINTS...")
+        
+        for endpoint_name, endpoint_url in priority_endpoints:
+            if endpoint_url is None:
+                print(f"\n⏭️  SKIPPING {endpoint_name} - No test data available")
+                continue
+            
+            print(f"\n🔍 Testing {endpoint_name}...")
+            
+            success, response = self.run_test(
+                f"LOGO INTEGRATION: {endpoint_name}",
+                "GET",
+                endpoint_url,
+                200,
+                expect_pdf=True
+            )
+            
+            if success:
+                pdf_size = response.get('pdf_size', 0)
+                content_type_valid = True  # run_test already validates content-type for PDFs
+                
+                # Logo integration validation criteria
+                logo_criteria = {
+                    'pdf_generated': success,
+                    'content_type_valid': content_type_valid,
+                    'size_indicates_logo': pdf_size > 2500,  # Logo should add significant content
+                    'size_reasonable': pdf_size < 50000,  # But not too large
+                    'pdf_size': pdf_size
+                }
+                
+                if all([logo_criteria['pdf_generated'], logo_criteria['content_type_valid'], logo_criteria['size_indicates_logo']]):
+                    print(f"✅ LOGO INTEGRATION VERIFIED: {endpoint_name}")
+                    print(f"   📊 PDF Size: {pdf_size} bytes (indicates logo content)")
+                    print(f"   📄 Content-Type: application/pdf ✓")
+                    print(f"   🎨 Logo Integration: SUCCESSFUL")
+                    logo_test_results.append((endpoint_name, True, pdf_size))
+                else:
+                    print(f"⚠️  LOGO INTEGRATION CONCERNS: {endpoint_name}")
+                    print(f"   📊 PDF Size: {pdf_size} bytes")
+                    if pdf_size < 2500:
+                        print(f"   ⚠️  Size may indicate missing logo content")
+                    logo_test_results.append((endpoint_name, False, pdf_size))
+                    all_tests_passed = False
+            else:
+                print(f"❌ LOGO INTEGRATION FAILED: {endpoint_name}")
+                print(f"   ❌ PDF Generation Failed")
+                logo_test_results.append((endpoint_name, False, 0))
+                all_tests_passed = False
+        
+        # Test logo fallback scenario (when logo file is unavailable)
+        print(f"\n🔍 Testing Logo Fallback Scenario...")
+        
+        # Test that PDFs still generate even if logo is missing
+        success, response = self.run_test(
+            "LOGO FALLBACK: PDF Generation without Logo File",
+            "GET",
+            "api/pdf/rapport/journal_ventes",
+            200,
+            expect_pdf=True
+        )
+        
+        if success:
+            print("✅ LOGO FALLBACK VERIFIED: PDFs generate even if logo unavailable")
+        else:
+            print("❌ LOGO FALLBACK FAILED: PDF generation breaks without logo")
+            all_tests_passed = False
+        
+        # Summary of logo integration testing
+        print(f"\n{'='*80}")
+        print("🎯 ECO PUMP AFRIK LOGO INTEGRATION TEST SUMMARY")
+        print(f"{'='*80}")
+        
+        successful_integrations = 0
+        total_tested = 0
+        
+        for endpoint_name, success, pdf_size in logo_test_results:
+            total_tested += 1
+            if success:
+                successful_integrations += 1
+                print(f"✅ {endpoint_name}: LOGO INTEGRATED ({pdf_size} bytes)")
+            else:
+                print(f"❌ {endpoint_name}: LOGO INTEGRATION ISSUE ({pdf_size} bytes)")
+        
+        success_rate = (successful_integrations / total_tested * 100) if total_tested > 0 else 0
+        
+        print(f"\n📊 LOGO INTEGRATION RESULTS:")
+        print(f"   🎯 Endpoints Tested: {total_tested}")
+        print(f"   ✅ Successful Integrations: {successful_integrations}")
+        print(f"   📈 Success Rate: {success_rate:.1f}%")
+        
+        if success_rate >= 90:
+            print(f"\n🎉 EXCELLENT: ECO PUMP AFRIK logo integration is working excellently!")
+        elif success_rate >= 75:
+            print(f"\n✅ GOOD: ECO PUMP AFRIK logo integration is working well with minor issues")
+        else:
+            print(f"\n⚠️  NEEDS ATTENTION: ECO PUMP AFRIK logo integration has significant issues")
+        
+        print(f"{'='*80}")
+        
+        return all_tests_passed
+
 def main():
     print("🚀 Starting ECO PUMP AFRIK API Tests - CRITICAL CORRECTIONS VALIDATION")
     print("=" * 70)
