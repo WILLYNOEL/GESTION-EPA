@@ -630,9 +630,15 @@ async def get_stock_alerts():
 async def create_paiement(paiement: Paiement):
     try:
         paiement_data = paiement.dict()
+        current_time = datetime.now()
+        
+        # Generate paiement ID
         paiement_data["paiement_id"] = generate_id()
         paiement_data["date_paiement"] = date.today().isoformat()
-        paiement_data["created_at"] = datetime.now().isoformat()
+        paiement_data["created_at"] = current_time.isoformat()
+        paiement_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        paiement_data["updated_at"] = current_time.isoformat()
+        paiement_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = paiements_collection.insert_one(paiement_data)
         
