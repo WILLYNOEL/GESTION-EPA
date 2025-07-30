@@ -80,7 +80,8 @@ function App() {
     delai_livraison: '',
     conditions_paiement: '',
     mode_livraison: '',
-    reference_commande: ''
+    reference_commande: '',
+    commentaires: ''
   });
   
   // Paiement form state
