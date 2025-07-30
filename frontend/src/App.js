@@ -3263,9 +3263,11 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Card>
             )}
           </TabsContent>
+          )}
 
           {/* Stock Tab - Complete Implementation */}
-          <TabsContent value="stock" className="space-y-6">
+          {hasPermission('stock') && (
+            <TabsContent value="stock" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Gestion du Stock</h2>
               <Dialog open={isStockDialogOpen} onOpenChange={setIsStockDialogOpen}>
