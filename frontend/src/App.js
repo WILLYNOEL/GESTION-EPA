@@ -1660,7 +1660,8 @@ ECO PUMP AFRIK - Tous droits réservés`;
           )}
 
           {/* Dashboard Tab with enhanced design */}
-          <TabsContent value="dashboard" className="space-y-6">
+          {hasPermission('dashboard') && (
+            <TabsContent value="dashboard" className="space-y-6">
             {/* Alerts */}
             {alerts.length > 0 && (
               <Alert>
