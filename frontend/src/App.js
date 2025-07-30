@@ -900,94 +900,119 @@ ${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","$
             )}
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Total Clients</CardTitle>
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_clients || 0}</div>
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                    <span>FCFA: {stats.clients_fcfa || 0}</span>
-                    <span>EUR: {stats.clients_eur || 0}</span>
+                  <div className="text-3xl font-bold text-blue-700">{stats.total_clients || 0}</div>
+                  <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-2">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>FCFA: {stats.clients_fcfa || 0}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>EUR: {stats.clients_eur || 0}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Devis ce mois</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Devis ce mois</CardTitle>
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <FileText className="h-5 w-5 text-green-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.devis_ce_mois || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Montant: {formatCurrency(stats.montant_devis_mois || 0)}
+                  <div className="text-3xl font-bold text-green-700">{stats.devis_ce_mois || 0}</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    💰 Montant: <span className="font-semibold text-green-600">{formatCurrency(stats.montant_devis_mois || 0)}</span>
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Factures ce mois</CardTitle>
-                  <Receipt className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Factures ce mois</CardTitle>
+                  <div className="p-2 bg-purple-100 rounded-full">
+                    <Receipt className="h-5 w-5 text-purple-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.factures_ce_mois || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Montant: {formatCurrency(stats.montant_factures_mois || 0)}
+                  <div className="text-3xl font-bold text-purple-700">{stats.factures_ce_mois || 0}</div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    💰 Montant: <span className="font-semibold text-purple-600">{formatCurrency(stats.montant_factures_mois || 0)}</span>
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">À Encaisser</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">À Encaisser</CardTitle>
+                  <div className="p-2 bg-orange-100 rounded-full">
+                    <TrendingUp className="h-5 w-5 text-orange-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">
+                  <div className="text-3xl font-bold text-orange-700">
                     {formatCurrency(stats.montant_a_encaisser || 0)}
                   </div>
-                  <p className="text-xs text-muted-foreground">Factures impayées</p>
+                  <p className="text-xs text-orange-600 mt-2 font-medium">
+                    ⏰ Factures impayées
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Secondary Stats */}
+            {/* Secondary Stats with enhanced design */}
             <div className="grid gap-6 md:grid-cols-3">
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-slate-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Fournisseurs</CardTitle>
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Fournisseurs</CardTitle>
+                  <div className="p-2 bg-slate-100 rounded-full">
+                    <Building2 className="h-5 w-5 text-slate-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.total_fournisseurs || 0}</div>
+                  <div className="text-3xl font-bold text-slate-700">{stats.total_fournisseurs || 0}</div>
+                  <p className="text-xs text-muted-foreground mt-2">Partenaires actifs</p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-red-50 to-white border-l-4 border-l-red-500">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Alertes Stock</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Alertes Stock</CardTitle>
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <Package className="h-5 w-5 text-red-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{stats.stock_alerts || 0}</div>
-                  <p className="text-xs text-muted-foreground">Articles en stock bas</p>
+                  <div className="text-3xl font-bold text-red-600">{stats.stock_alerts || 0}</div>
+                  <p className="text-xs text-red-600 mt-2 font-medium">
+                    {stats.stock_alerts > 0 ? '⚠️ Action requise' : '✅ Stock optimal'}
+                  </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-indigo-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
-                  <FileCheck className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-slate-700">Total Documents</CardTitle>
+                  <div className="p-2 bg-indigo-100 rounded-full">
+                    <FileCheck className="h-5 w-5 text-indigo-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-3xl font-bold text-indigo-700">
                     {(stats.total_devis || 0) + (stats.total_factures || 0)}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.total_devis || 0} devis, {stats.total_factures || 0} factures
+                  <p className="text-xs text-muted-foreground mt-2">
+                    📄 {stats.total_devis || 0} devis, 🧾 {stats.total_factures || 0} factures
                   </p>
                 </CardContent>
               </Card>
