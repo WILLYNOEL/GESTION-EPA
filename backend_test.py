@@ -1232,8 +1232,8 @@ class EcoPumpAfrikAPITester:
         return True
 
 def main():
-    print("🚀 Starting ECO PUMP AFRIK API Tests")
-    print("=" * 50)
+    print("🚀 Starting ECO PUMP AFRIK API Tests - CRITICAL CORRECTIONS VALIDATION")
+    print("=" * 70)
     
     tester = EcoPumpAfrikAPITester()
     
@@ -1269,19 +1269,32 @@ def main():
     test_results.append(tester.test_get_paiements())
     test_results.append(tester.test_search_functionality())
     
-    # NEW PDF ENDPOINT TESTS - Critical for ECO PUMP AFRIK
-    print("\n" + "=" * 50)
-    print("🔥 TESTING NEW PDF ENDPOINTS - ECO PUMP AFRIK")
-    print("=" * 50)
+    # PDF ENDPOINT TESTS - Critical for ECO PUMP AFRIK
+    print("\n" + "=" * 70)
+    print("🔥 TESTING PDF ENDPOINTS - ECO PUMP AFRIK")
+    print("=" * 70)
     test_results.append(tester.test_pdf_document_generation())
     test_results.append(tester.test_pdf_report_generation())
     test_results.append(tester.test_pdf_content_headers())
     test_results.append(tester.test_pdf_with_real_data())
     
-    # CRITICAL NEW TESTS - Testing user-reported fixes
-    print("\n" + "=" * 50)
-    print("🚨 TESTING USER-REPORTED CORRECTIONS")
-    print("=" * 50)
+    # 🚨 CRITICAL NEW CORRECTIONS TESTING - HIGHEST PRIORITY
+    print("\n" + "=" * 70)
+    print("🚨 TESTING CRITICAL CORRECTIONS - ECO PUMP AFRIK USER REPORTS")
+    print("=" * 70)
+    print("Testing the 4 CRITICAL corrections from user bug reports:")
+    print("1. Balance clients table overflow fix")
+    print("2. ECO PUMP AFRIK logo with visible border")  
+    print("3. Period filters for reports")
+    print("4. Updated contact email")
+    print("=" * 70)
+    
+    test_results.append(tester.test_critical_corrections_balance_clients_overflow())
+    test_results.append(tester.test_critical_corrections_logo_with_border())
+    test_results.append(tester.test_critical_corrections_period_filters())
+    test_results.append(tester.test_critical_corrections_contact_email())
+    
+    # Additional critical tests
     test_results.append(tester.test_missing_stock_endpoint())
     test_results.append(tester.test_eco_pump_afrik_logo_improvements())
     test_results.append(tester.test_pdf_layout_corrections())
@@ -1290,16 +1303,22 @@ def main():
     test_results.append(tester.test_new_report_endpoints_specifically())
     
     # Print final results
-    print("\n" + "=" * 50)
-    print(f"📊 FINAL RESULTS")
+    print("\n" + "=" * 70)
+    print(f"📊 FINAL RESULTS - CRITICAL CORRECTIONS VALIDATION")
     print(f"Tests passed: {tester.tests_passed}/{tester.tests_run}")
     print(f"Success rate: {(tester.tests_passed/tester.tests_run)*100:.1f}%")
     
     if tester.tests_passed == tester.tests_run:
-        print("🎉 All tests passed! Backend API is working correctly.")
+        print("🎉 ALL CRITICAL CORRECTIONS VALIDATED! Backend API working correctly.")
+        print("✅ Balance clients table overflow - FIXED")
+        print("✅ ECO PUMP AFRIK logo with border - FIXED") 
+        print("✅ Period filters for reports - FIXED")
+        print("✅ Updated contact email - FIXED")
         return 0
     else:
-        print("⚠️  Some tests failed. Check the details above.")
+        print("⚠️  Some critical corrections failed validation. Check details above.")
+        failed_tests = tester.tests_run - tester.tests_passed
+        print(f"❌ {failed_tests} test(s) failed out of {tester.tests_run}")
         return 1
 
 if __name__ == "__main__":
