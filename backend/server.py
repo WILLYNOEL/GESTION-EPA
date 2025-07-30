@@ -767,15 +767,35 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             header_style.textColor = colors.HexColor('#0066cc')
             header_style.alignment = 1  # Center alignment
             
-            # Create ECO PUMP AFRIK branded header
-            story.append(Paragraph("🏭 ECO PUMP AFRIK", header_style))
+            # Create ECO PUMP AFRIK branded header with better formatting
+            header_table_data = [
+                ["🏭", "ECO PUMP AFRIK", "📞 +225 0748576956"],
+                ["💧", "Solutions Hydrauliques Professionnelles", "📧 contact@ecopumpafrik.com"],
+                ["🔧", "Gestion Intelligente", "🌐 www.ecopumpafrik.com"]
+            ]
             
-            subtitle_style = styles['Normal']
-            subtitle_style.fontSize = 14
-            subtitle_style.textColor = colors.HexColor('#666666')
-            subtitle_style.alignment = 1  # Center alignment
-            story.append(Paragraph("Gestion Intelligente - Solutions Hydrauliques", subtitle_style))
-            story.append(Spacer(1, 30))
+            header_table = Table(header_table_data, colWidths=[30, 300, 150])
+            header_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (0, -1), 16),  # Icons column
+                ('FONTSIZE', (1, 0), (1, 0), 20),   # Company name 
+                ('FONTSIZE', (1, 1), (1, -1), 10), # Subtitle and tagline
+                ('FONTSIZE', (2, 0), (2, -1), 8),  # Contact info
+                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#0066cc')),  # Company name blue
+                ('TEXTCOLOR', (1, 1), (1, -1), colors.HexColor('#666666')), # Gray text
+                ('TEXTCOLOR', (2, 0), (2, -1), colors.HexColor('#444444')), # Contact dark gray
+                ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # Center icons
+                ('ALIGN', (1, 0), (1, -1), 'LEFT'),    # Left align company info
+                ('ALIGN', (2, 0), (2, -1), 'RIGHT'),   # Right align contact
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ]))
+            
+            story.append(header_table)
+            story.append(Spacer(1, 20))
             
             # Document title
             title_style = styles['Heading1']
