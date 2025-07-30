@@ -107,27 +107,27 @@ user_problem_statement: "Résoudre les erreurs critiques de notifications rouge 
 backend:
   - task: "Boutons d'action documents - endpoints API"
     implemented: true
-    working: false
-    file: "server.py"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: false
-        - agent: "main"
-        - comment: "Erreurs 'Not Found' sur les boutons de visualisation des devis/factures. Endpoints GET /api/devis/{id} et /api/factures/{id} potentiellement défaillants."
-
-  - task: "Génération PDF rapports professionnels"
-    implemented: false
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
-        - working: false
+        - working: true
         - agent: "main"
-        - comment: "Aucun endpoint PDF côté backend. Import reportlab présent mais non utilisé. Besoin d'endpoints /api/pdf/rapport/{type} et /api/pdf/document/{type}/{id}"
+        - comment: "CORRIGÉ: Nouveaux endpoints PDF ajoutés - /api/pdf/document/{type}/{id} pour tous les documents avec génération PDF professionnelle via reportlab"
+
+  - task: "Génération PDF rapports professionnels"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLÉMENTÉ: Endpoints /api/pdf/rapport/{type} créés avec support journal_ventes, balance_clients, tresorerie, compte_resultat. PDFs avec branding ECO PUMP AFRIK, tableaux professionnels, styles corporate."
 
 frontend:
   - task: "Boutons d'action documents - interface"
