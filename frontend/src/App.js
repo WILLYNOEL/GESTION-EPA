@@ -936,8 +936,6 @@ function App() {
             </Card>
           </TabsContent>
 
-          </TabsContent>
-
           {/* Fournisseurs Tab - Complete Implementation */}
           <TabsContent value="fournisseurs" className="space-y-6">
             <div className="flex justify-between items-center">
