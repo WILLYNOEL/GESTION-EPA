@@ -14,8 +14,11 @@ import { Alert, AlertDescription } from './components/ui/alert';
 import { 
   Plus, Users, FileText, Euro, DollarSign, Eye, Edit, Trash2, Download, 
   Search, Package, CreditCard, TrendingUp, AlertTriangle, Building2,
-  ShoppingCart, Receipt, BarChart3, FileCheck, ArrowRightLeft, Calendar
+  ShoppingCart, Receipt, BarChart3, FileCheck, ArrowRightLeft, Calendar,
+  LogOut, Shield, Settings
 } from 'lucide-react';
+import Login from './Login';
+import AdminUsers from './AdminUsers';
 import './App.css';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
