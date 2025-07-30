@@ -924,10 +924,10 @@ async def generate_report_pdf(report_type: str):
             story = []
             styles = getSampleStyleSheet()
             
-            # Header with ECO PUMP AFRIK branding
+            # Header with ECO PUMP AFRIK branding (no phone number 074857656)
             header_table_data = [
-                ["🏭", "ECO PUMP AFRIK", "📞 +225 0748576956"],
-                ["💧", "Solutions Hydrauliques Professionnelles", "📧 contact@ecopumpafrik.com"],
+                ["🏭", "ECO PUMP AFRIK", "📧 contact@ecopumpafrik.com"],
+                ["💧", "Solutions Hydrauliques Professionnelles", "📞 +225 0707806359"],
                 ["🔧", "Gestion Intelligente", "🌐 www.ecopumpafrik.com"]
             ]
             
@@ -949,6 +949,8 @@ async def generate_report_pdf(report_type: str):
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
                 ('TOPPADDING', (0, 0), (-1, -1), 3),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0066cc')),  # Add border to make logo visible
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8f9fa')),  # Light background
             ]))
             
             story.append(header_table)
