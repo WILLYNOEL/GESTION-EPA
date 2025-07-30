@@ -4332,9 +4332,19 @@ ECO PUMP AFRIK - Tous droits réservés`;
             </div>
 
           </TabsContent>
+
+          {/* Administration Tab - Admins only */}
+          {currentUser?.role === 'admin' && (
+            <TabsContent value="administration" className="space-y-6">
+              <AdminUsers token={token} />
+            </TabsContent>
+          )}
+
         </Tabs>
       </div>
     </div>
+      )}
+    </>
   );
 }
 
