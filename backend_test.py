@@ -376,20 +376,90 @@ class EcoPumpAfrikAPITester:
         return success
 
     def test_search_functionality(self):
-        """Test search functionality"""
+        """Test NEW advanced search endpoints - CRITICAL USER CORRECTION"""
+        print("\n🔍 Testing NEW ADVANCED SEARCH ENDPOINTS - CRITICAL USER CORRECTION...")
+        
+        all_passed = True
+        
+        # Test /api/search/devis endpoint
         success, response = self.run_test(
-            "Search Documents",
+            "NEW ENDPOINT: Search Devis Advanced",
             "GET",
-            "api/search",
+            "api/search/devis",
             200,
-            params={"q": "TEST"}
+            params={
+                "client_nom": "TEST",
+                "devise": "FCFA",
+                "statut": "brouillon",
+                "limit": 10
+            }
         )
+        if success and 'devis' in response and 'count' in response and 'filters_applied' in response:
+            print(f"✅ /api/search/devis: Found {response['count']} devis with filters")
+            print(f"✅ Response includes: devis, count, filters_applied")
+        else:
+            print("❌ /api/search/devis failed or missing required fields")
+            all_passed = False
         
-        if success and 'results' in response:
-            results = response['results']
-            print(f"✅ Search found: {len(results.get('clients', []))} clients, {len(results.get('devis', []))} devis, {len(results.get('factures', []))} factures")
+        # Test /api/search/factures endpoint
+        success, response = self.run_test(
+            "NEW ENDPOINT: Search Factures Advanced",
+            "GET",
+            "api/search/factures",
+            200,
+            params={
+                "client_nom": "TEST",
+                "statut_paiement": "impayé",
+                "montant_min": "100000",
+                "montant_max": "5000000"
+            }
+        )
+        if success and 'factures' in response and 'count' in response and 'filters_applied' in response:
+            print(f"✅ /api/search/factures: Found {response['count']} factures with filters")
+            print(f"✅ Response includes: factures, count, filters_applied")
+        else:
+            print("❌ /api/search/factures failed or missing required fields")
+            all_passed = False
         
-        return success
+        # Test /api/search/clients endpoint
+        success, response = self.run_test(
+            "NEW ENDPOINT: Search Clients Advanced",
+            "GET",
+            "api/search/clients",
+            200,
+            params={
+                "nom": "TEST",
+                "type_client": "standard",
+                "devise": "FCFA"
+            }
+        )
+        if success and 'clients' in response and 'count' in response and 'filters_applied' in response:
+            print(f"✅ /api/search/clients: Found {response['count']} clients with filters")
+            print(f"✅ Response includes: clients, count, filters_applied")
+        else:
+            print("❌ /api/search/clients failed or missing required fields")
+            all_passed = False
+        
+        # Test /api/search/stock endpoint
+        success, response = self.run_test(
+            "NEW ENDPOINT: Search Stock Advanced",
+            "GET",
+            "api/search/stock",
+            200,
+            params={
+                "designation": "test",
+                "stock_bas": "true",
+                "fournisseur": "TEST"
+            }
+        )
+        if success and 'articles' in response and 'count' in response and 'filters_applied' in response:
+            print(f"✅ /api/search/stock: Found {response['count']} articles with filters")
+            print(f"✅ Response includes: articles, count, filters_applied")
+        else:
+            print("❌ /api/search/stock failed or missing required fields")
+            all_passed = False
+        
+        return all_passed
 
     def test_pdf_document_generation(self):
         """Test PDF generation for documents (devis, facture, paiement)"""
