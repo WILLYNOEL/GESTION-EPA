@@ -1020,7 +1020,11 @@ function App() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewDocument('devis', d.devis_id)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                             {d.statut !== 'converti' && (
@@ -1028,12 +1032,17 @@ function App() {
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => convertDevisToFacture(d.devis_id)}
+                                disabled={loading}
                               >
                                 <ArrowRightLeft className="h-4 w-4 mr-1" />
                                 Facture
                               </Button>
                             )}
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDownloadDocument('devis', d.devis_id)}
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
                           </div>
