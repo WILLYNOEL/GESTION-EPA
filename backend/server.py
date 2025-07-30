@@ -594,7 +594,17 @@ async def create_article_stock(article: ArticleStock):
 @app.put("/api/stock/{article_id}", response_model=dict)
 async def update_stock_article(article_id: str, article_update: dict):
     try:
-        article_update["updated_at"] = datetime.now().isoformat()
+        current_time = datetime.now()
+        
+        # Remove immutable fields from update data
+        immutable_fields = ['_id', 'article_id', 'created_at', 'created_at_formatted']
+        for field in immutable_fields:
+            if field in article_update:
+                del article_update[field]
+        
+        # Add updated timestamp
+        article_update["updated_at"] = current_time.isoformat()
+        article_update["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = stock_collection.update_one(
             {"article_id": article_id},
@@ -605,14 +615,15 @@ async def update_stock_article(article_id: str, article_update: dict):
             raise HTTPException(status_code=404, detail="Article non trouvé")
         
         updated_article = stock_collection.find_one({"article_id": article_id})
-        updated_article["_id"] = str(updated_article["_id"])
+        if updated_article:
+            updated_article["_id"] = str(updated_article["_id"])
         
         return {"success": True, "article": updated_article}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error updating stock article: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la mise à jour: {str(e)}")
 
 @app.get("/api/stock/alerts", response_model=dict)
 async def get_stock_alerts():
