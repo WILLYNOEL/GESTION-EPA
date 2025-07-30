@@ -511,6 +511,29 @@ ${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","$
     }
   };
 
+  const formatCurrency = (amount, currency = 'FCFA') => {
+    const formatted = new Intl.NumberFormat('fr-FR').format(amount);
+    return currency === 'EUR' ? `${formatted} €` : `${formatted} F CFA`;
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  const getStatutBadge = (statut) => {
+    const variants = {
+      'brouillon': 'secondary',
+      'envoyé': 'default',
+      'accepté': 'default',
+      'converti': 'default',
+      'émise': 'default',
+      'payé': 'default',
+      'impayé': 'destructive',
+      'partiel': 'secondary'
+    };
+    return variants[statut] || 'secondary';
+  };
+
   // Système d'alertes automatiques intelligentes
   const generateSmartAlerts = () => {
     const alertsArray = [];
