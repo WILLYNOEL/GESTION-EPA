@@ -2239,6 +2239,19 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(verify
         user_id = str(uuid.uuid4())
         hashed_password = hash_password(user_data.password)
         
+        # Permissions par défaut pour un nouvel utilisateur (seulement dashboard)
+        default_permissions = {
+            "dashboard": True,
+            "clients": False,
+            "fournisseurs": False,
+            "devis": False,
+            "factures": False,
+            "stock": False,
+            "paiements": False,
+            "rapports": False,
+            "administration": False
+        }
+        
         new_user = {
             "user_id": user_id,
             "username": user_data.username,
@@ -2246,6 +2259,7 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(verify
             "email": user_data.email,
             "role": user_data.role,
             "is_active": True,
+            "permissions": user_data.permissions if user_data.permissions else default_permissions,
             "created_at": datetime.now().isoformat(),
             "last_login": None
         }
