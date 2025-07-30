@@ -908,16 +908,35 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
         raise HTTPException(status_code=500, detail=f"Erreur lors de la génération du PDF: {str(e)}")
 
 @app.get("/api/pdf/rapport/{report_type}")
-async def generate_report_pdf(report_type: str):
-    """Generate professional PDF reports"""
+async def generate_report_pdf(report_type: str, date_debut: str = None, date_fin: str = None):
+    """Generate professional PDF reports with optional date filtering"""
     try:
-        # Get data for reports
-        current_month_start = datetime.now().replace(day=1)
+        # Parse date filters if provided
+        date_filter = {}
+        if date_debut and date_fin:
+            try:
+                debut = datetime.fromisoformat(date_debut)
+                fin = datetime.fromisoformat(date_fin)
+                date_filter = {
+                    "$gte": debut.isoformat(),
+                    "$lte": fin.isoformat()
+                }
+            except:
+                # If date parsing fails, ignore filters
+                date_filter = {}
         
+        # Get data for reports with date filtering
         clients_data = list(clients_collection.find({}))
-        factures_data = list(factures_collection.find({}).sort("created_at", -1))
-        devis_data = list(devis_collection.find({}).sort("created_at", -1))
-        paiements_data = list(paiements_collection.find({}).sort("created_at", -1))
+        
+        # Apply date filtering to collections
+        if date_filter:
+            factures_data = list(factures_collection.find({"date_facture": date_filter}).sort("created_at", -1))
+            devis_data = list(devis_collection.find({"date_devis": date_filter}).sort("created_at", -1))
+            paiements_data = list(paiements_collection.find({"date_paiement": date_filter}).sort("created_at", -1))
+        else:
+            factures_data = list(factures_collection.find({}).sort("created_at", -1))
+            devis_data = list(devis_collection.find({}).sort("created_at", -1))
+            paiements_data = list(paiements_collection.find({}).sort("created_at", -1))
         
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
             doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
