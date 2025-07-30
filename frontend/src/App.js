@@ -1990,7 +1990,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
                         <SelectValue placeholder="Toutes devises" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Toutes devises</SelectItem>
+                        <SelectItem value="toutes">Toutes devises</SelectItem>
                         <SelectItem value="FCFA">FCFA</SelectItem>
                         <SelectItem value="EUR">EUR</SelectItem>
                       </SelectContent>
