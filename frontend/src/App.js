@@ -538,8 +538,23 @@ function App() {
           backendReportType = 'compte_resultat';
       }
       
-      // Use the new PDF endpoint for report generation
-      const response = await fetch(`${API_BASE_URL}/api/pdf/rapport/${backendReportType}`);
+      // Use the new PDF endpoint for report generation with date filters
+      let apiUrl = `${API_BASE_URL}/api/pdf/rapport/${backendReportType}`;
+      
+      // Add date filters if they are set
+      const queryParams = [];
+      if (rapportFilters.date_debut) {
+        queryParams.push(`date_debut=${rapportFilters.date_debut}`);
+      }
+      if (rapportFilters.date_fin) {
+        queryParams.push(`date_fin=${rapportFilters.date_fin}`);
+      }
+      
+      if (queryParams.length > 0) {
+        apiUrl += '?' + queryParams.join('&');
+      }
+      
+      const response = await fetch(apiUrl);
       
       if (!response.ok) {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`);
