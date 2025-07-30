@@ -966,6 +966,73 @@ async def generate_report_pdf(report_type: str):
                 ]))
                 story.append(balance_table)
                 
+            elif report_type == "journal_achats":
+                story.append(Paragraph("JOURNAL DES ACHATS", title_style))
+                story.append(Spacer(1, 20))
+                
+                # Get purchases data (since we don't have achats_collection implemented, we'll show placeholder) 
+                achats_data = []  # In real implementation, get from achats_collection
+                
+                # Purchases summary
+                summary_data = [
+                    ["Indicateur", "Valeur"],
+                    ["Nombre de commandes", "0"],  # Would be len(achats_data)
+                    ["Total des achats", "0,00 F CFA"],  # Would be sum(a.total_ttc for a in achats_data)
+                    ["Commandes en attente", "0"],
+                    ["Fournisseurs actifs", str(len([f for f in fournisseurs_collection.find({})]))],
+                ]
+                
+                table = Table(summary_data)
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#28a745')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(table)
+                
+                story.append(Spacer(1, 20))
+                story.append(Paragraph("Note: Module d'achats en cours de développement", styles['Normal']))
+                
+            elif report_type == "balance_fournisseurs":
+                story.append(Paragraph("BALANCE FOURNISSEURS", title_style))
+                story.append(Spacer(1, 20))
+                
+                # Supplier balance table
+                fournisseurs_data = list(fournisseurs_collection.find({}))
+                balance_data = [["Fournisseur", "Devise", "Nb Commandes", "Total Commandé", "Total Payé", "Solde"]]
+                
+                for fournisseur in fournisseurs_data:
+                    # Since achats module is not fully implemented, we'll show placeholder data
+                    balance_data.append([
+                        fournisseur.get('nom', ''),
+                        fournisseur.get('devise', ''),
+                        "0",  # Would be number of orders
+                        "0,00",  # Would be total ordered
+                        "0,00",  # Would be total paid
+                        "0,00"   # Would be balance
+                    ])
+                
+                balance_table = Table(balance_data)
+                balance_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffc107')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 9),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(balance_table)
+                
+                story.append(Spacer(1, 20))
+                story.append(Paragraph("Note: Module d'achats en cours de développement", styles['Normal']))
+                
             elif report_type == "tresorerie":
                 story.append(Paragraph("SUIVI DE TRÉSORERIE", title_style))
                 story.append(Spacer(1, 20))
