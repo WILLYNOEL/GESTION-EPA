@@ -740,12 +740,19 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             
             # Header with ECO PUMP AFRIK branding
             header_style = styles['Title']
-            header_style.fontSize = 24
+            header_style.fontSize = 28
             header_style.textColor = colors.HexColor('#0066cc')
+            header_style.alignment = 1  # Center alignment
             
-            story.append(Paragraph("ECO PUMP AFRIK", header_style))
-            story.append(Paragraph("Gestion Intelligente", styles['Normal']))
-            story.append(Spacer(1, 20))
+            # Create ECO PUMP AFRIK branded header
+            story.append(Paragraph("🏭 ECO PUMP AFRIK", header_style))
+            
+            subtitle_style = styles['Normal']
+            subtitle_style.fontSize = 14
+            subtitle_style.textColor = colors.HexColor('#666666')
+            subtitle_style.alignment = 1  # Center alignment
+            story.append(Paragraph("Gestion Intelligente - Solutions Hydrauliques", subtitle_style))
+            story.append(Spacer(1, 30))
             
             # Document title
             title_style = styles['Heading1']
