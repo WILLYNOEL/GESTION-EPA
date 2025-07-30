@@ -397,12 +397,16 @@ async def create_devis(devis: Devis):
             raise HTTPException(status_code=404, detail="Client non trouvé")
         
         devis_data = devis.dict()
+        current_time = datetime.now()
+        
         devis_data["devis_id"] = generate_id()
         devis_data["date_devis"] = date.today().isoformat()
         devis_data["numero_devis"] = generate_numero("DEV", devis.client_nom, date.today())
         devis_data["devise"] = client["devise"]
-        devis_data["created_at"] = datetime.now().isoformat()
-        devis_data["updated_at"] = datetime.now().isoformat()
+        devis_data["created_at"] = current_time.isoformat()
+        devis_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        devis_data["updated_at"] = current_time.isoformat()
+        devis_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = devis_collection.insert_one(devis_data)
         
