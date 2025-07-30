@@ -860,6 +860,12 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
                     story.append(Paragraph(f"<b>Conditions de paiement:</b> {document['conditions_paiement']}", styles['Normal']))
                 if document.get('mode_livraison'):
                     story.append(Paragraph(f"<b>Mode de livraison:</b> {document['mode_livraison']}", styles['Normal']))
+                if document.get('commentaires'):
+                    story.append(Spacer(1, 10))
+                    comment_style = styles['Normal']
+                    comment_style.fontSize = 9
+                    comment_style.textColor = colors.HexColor('#444444')
+                    story.append(Paragraph(f"<b>Commentaires:</b> {document['commentaires']}", comment_style))
                 
             else:  # paiement
                 story.append(Paragraph(f"<b>Montant:</b> {document['montant']:,.2f} {document['devise']}", styles['Heading2']))
