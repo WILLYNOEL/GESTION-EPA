@@ -199,8 +199,8 @@ def get_logo_image():
         logo_path = "/app/logo_eco_pump.png"
         if os.path.exists(logo_path):
             from reportlab.platypus import Image as ReportLabImage
-            # Create a smaller version for PDF thumbnails (max 60x60 pixels)
-            logo_img = ReportLabImage(logo_path, width=50, height=50)
+            # Create a larger version for PDF (increased from 50x50 to 80x80)
+            logo_img = ReportLabImage(logo_path, width=80, height=80)
             return logo_img
         else:
             logger.warning("Logo file not found, using text-based branding")
@@ -214,17 +214,19 @@ def create_pdf_header_with_logo():
     logo_img = get_logo_image()
     
     if logo_img:
-        # Header with actual logo
+        # Header with actual logo - FOND BLANC au lieu de bleu
         logo_table_data = [
             [logo_img, "ECO PUMP AFRIK", ""],
             ["", "Solutions Hydrauliques Professionnelles", ""]
         ]
         
-        logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
+        # Augmentation de la largeur pour le logo plus grand (80 -> 120)
+        logo_table = Table(logo_table_data, colWidths=[120, 340, 80])
         logo_table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (0, 0), 'CENTER'),
             ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
-            ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
+            # FOND BLANC au lieu de bleu comme demandé
+            ('BACKGROUND', (0, 0), (0, 1), colors.white),
             ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (1, 0), (1, 0), 28),
             ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
@@ -233,7 +235,8 @@ def create_pdf_header_with_logo():
             ('FONTSIZE', (1, 1), (1, 1), 14),
             ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
             ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-            ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
+            # Fond blanc aussi pour la cellule de droite
+            ('BACKGROUND', (2, 0), (2, 1), colors.white),
             ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
             ('TOPPADDING', (0, 0), (-1, -1), 15),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
@@ -247,7 +250,7 @@ def create_pdf_header_with_logo():
         
         logo_table = Table(logo_table_data, colWidths=[80, 360, 80])  
         logo_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
+            ('BACKGROUND', (0, 0), (0, 1), colors.white),  # Fond blanc ici aussi
             ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (1, 0), (1, 0), 28),
             ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
@@ -256,7 +259,7 @@ def create_pdf_header_with_logo():
             ('FONTSIZE', (1, 1), (1, 1), 14),
             ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
             ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-            ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
+            ('BACKGROUND', (2, 0), (2, 1), colors.white),  # Fond blanc ici aussi
             ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
             ('TOPPADDING', (0, 0), (-1, -1), 15),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
