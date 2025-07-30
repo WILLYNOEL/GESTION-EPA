@@ -1851,7 +1851,8 @@ ECO PUMP AFRIK - Tous droits réservés`;
           )}
 
           {/* Clients Tab */}
-          <TabsContent value="clients" className="space-y-6">
+          {hasPermission('clients') && (
+            <TabsContent value="clients" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Gestion des Clients</h2>
               <Dialog open={isClientDialogOpen} onOpenChange={setIsClientDialogOpen}>
