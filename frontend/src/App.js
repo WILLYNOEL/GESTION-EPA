@@ -949,11 +949,7 @@ function App() {
                         <TableCell>{formatDate(client.created_at)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">
-                            <Button size="sm" variant="outline" onClick={() => {
-                              setClientForm(client);
-                              setEditingClient(client);
-                              setIsClientDialogOpen(true);
-                            }}>
+                            <Button size="sm" variant="outline" onClick={() => handleEditClient(client)}>
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button 
