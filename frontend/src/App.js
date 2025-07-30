@@ -919,7 +919,8 @@ ECO PUMP AFRIK - Tous droits réservés`;
       setDevisForm({
         client_id: '', client_nom: '',
         articles: [{ item: 1, ref: '', designation: '', quantite: 1, prix_unitaire: 0, total: 0 }],
-        delai_livraison: '', conditions_paiement: '', mode_livraison: '', reference_commande: ''
+        delai_livraison: '', conditions_paiement: '', mode_livraison: '', reference_commande: '',
+        commentaires: ''
       });
       
       setIsDevisDialogOpen(false);
