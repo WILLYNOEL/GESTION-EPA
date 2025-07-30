@@ -230,54 +230,253 @@ function App() {
   const handleViewDocument = async (type, id) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/${type}/${id}`);
-      const document = response.data[type] || response.data.client || response.data.fournisseur || response.data.article;
+      
+      // Fix the API endpoint path
+      let apiPath = '';
+      if (type === 'devis') {
+        apiPath = `devis`;
+      } else if (type === 'facture') {
+        apiPath = `factures`;
+      } else if (type === 'client') {
+        apiPath = `clients`;
+      } else if (type === 'fournisseur') {
+        apiPath = `fournisseurs`;
+      } else if (type === 'stock') {
+        apiPath = `stock`;
+      } else if (type === 'paiement') {
+        apiPath = `paiements`;
+      }
+      
+      const response = await axios.get(`${API_BASE_URL}/api/${apiPath}/${id}`);
+      const document = response.data[type] || response.data.devis || response.data.facture || response.data.client || response.data.fournisseur || response.data.article || response.data.paiement;
       
       // Create professional document view with ECO PUMP AFRIK branding
       if (type === 'devis' || type === 'facture') {
         const docType = type === 'facture' ? 'FACTURE' : 'DEVIS';
         const numero = document.numero_devis || document.numero_facture;
         
-        // Create a new window with professional document layout
-        const newWindow = window.open('', '_blank', 'width=800,height=1000');
-        newWindow.document.write(`
+        // Create a new window with professional document layout  
+        const newWindow = window.open('', '_blank', 'width=800,height=1000,scrollbars=yes');
+        const docHTML = `
           <!DOCTYPE html>
           <html>
           <head>
             <title>${docType} - ${numero}</title>
+            <meta charset="UTF-8">
             <style>
-              body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-              .document { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
-              .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0066cc; padding-bottom: 20px; margin-bottom: 30px; }
-              .logo { font-size: 24px; font-weight: bold; color: #0066cc; }
-              .company-info { text-align: right; font-size: 12px; color: #666; }
-              .doc-title { text-align: center; font-size: 32px; font-weight: bold; color: #333; margin: 20px 0; }
-              .doc-number { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
-              .client-info { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
-              .client-title { font-weight: bold; color: #0066cc; margin-bottom: 10px; }
-              .articles-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              .articles-table th, .articles-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-              .articles-table th { background: #0066cc; color: white; font-weight: bold; }
-              .articles-table .amount { text-align: right; font-weight: bold; }
-              .totals { margin-top: 30px; }
-              .totals-table { width: 400px; margin-left: auto; border-collapse: collapse; }
-              .totals-table td { padding: 8px; border-bottom: 1px solid #ddd; }
-              .totals-table .label { font-weight: bold; }
-              .totals-table .final { background: #0066cc; color: white; font-weight: bold; font-size: 18px; }
-              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; text-align: center; }
-              .conditions { margin-top: 20px; font-size: 12px; color: #666; }
-              @media print { body { background: white; } .document { box-shadow: none; } }
+              * { box-sizing: border-box; }
+              body { 
+                font-family: 'Arial', sans-serif; 
+                margin: 0; 
+                padding: 20px;
+                background: #f8f9fa; 
+                color: #333;
+              }
+              .document { 
+                background: white; 
+                padding: 40px; 
+                border-radius: 8px; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+                max-width: 800px; 
+                margin: 0 auto;
+                position: relative;
+              }
+              .header { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: flex-start; 
+                border-bottom: 3px solid #0066cc; 
+                padding-bottom: 25px; 
+                margin-bottom: 40px; 
+              }
+              .logo { 
+                flex: 1;
+              }
+              .logo h1 {
+                font-size: 36px; 
+                font-weight: bold; 
+                color: #0066cc; 
+                margin: 0;
+                letter-spacing: -1px;
+              }
+              .logo p {
+                font-size: 18px; 
+                color: #666; 
+                margin: 8px 0 0 0;
+                font-weight: 300;
+              }
+              .company-info { 
+                text-align: right; 
+                font-size: 13px; 
+                color: #666; 
+                line-height: 1.6;
+                flex: 1;
+              }
+              .company-info div:first-child {
+                font-weight: bold;
+                color: #333;
+                font-size: 14px;
+                margin-bottom: 8px;
+              }
+              .doc-title { 
+                text-align: center; 
+                font-size: 42px; 
+                font-weight: bold; 
+                color: #333; 
+                margin: 30px 0 10px 0;
+                letter-spacing: 2px;
+              }
+              .doc-number { 
+                text-align: center; 
+                font-size: 18px; 
+                color: #666; 
+                margin-bottom: 40px;
+                font-weight: 500;
+              }
+              .doc-date {
+                text-align: right;
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 30px;
+              }
+              .client-info { 
+                background: #f8f9fa; 
+                padding: 25px; 
+                border-radius: 8px; 
+                margin-bottom: 40px;
+                border-left: 4px solid #0066cc;
+              }
+              .client-title { 
+                font-weight: bold; 
+                color: #0066cc; 
+                margin-bottom: 15px;
+                font-size: 16px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              }
+              .client-name {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 8px;
+              }
+              .articles-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin: 30px 0;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              .articles-table th, .articles-table td { 
+                padding: 15px 12px; 
+                text-align: left;
+                border-bottom: 1px solid #eee;
+              }
+              .articles-table th { 
+                background: #0066cc; 
+                color: white; 
+                font-weight: bold;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              .articles-table tr:nth-child(even) {
+                background: #f8f9fa;
+              }
+              .articles-table .amount { 
+                text-align: right; 
+                font-weight: bold;
+                font-family: 'Courier New', monospace;
+              }
+              .totals { 
+                margin-top: 40px;
+              }
+              .totals-table { 
+                width: 450px; 
+                margin-left: auto; 
+                border-collapse: collapse;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              .totals-table td { 
+                padding: 12px 20px; 
+                border-bottom: 1px solid #eee;
+                font-size: 14px;
+              }
+              .totals-table .label { 
+                font-weight: bold;
+                color: #666;
+              }
+              .totals-table .amount {
+                text-align: right;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+              }
+              .totals-table .final { 
+                background: #0066cc; 
+                color: white; 
+                font-weight: bold; 
+                font-size: 18px;
+              }
+              .footer { 
+                margin-top: 50px; 
+                padding-top: 30px; 
+                border-top: 2px solid #eee; 
+                font-size: 12px; 
+                color: #666; 
+                text-align: center;
+                line-height: 1.6;
+              }
+              .footer strong {
+                color: #333;
+                font-size: 13px;
+              }
+              .conditions { 
+                margin-top: 30px; 
+                font-size: 13px; 
+                color: #666;
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #28a745;
+              }
+              .conditions-title {
+                font-weight: bold;
+                color: #28a745;
+                margin-bottom: 15px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              }
+              .conditions div {
+                margin-bottom: 8px;
+              }
+              .conditions .note {
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+                font-style: italic;
+                color: #0066cc;
+                font-weight: 500;
+              }
+              @media print { 
+                body { background: white; }
+                .document { box-shadow: none; }
+                .no-print { display: none; }
+              }
             </style>
           </head>
           <body>
             <div class="document">
               <div class="header">
                 <div class="logo">
-                  <div style="font-size: 32px; color: #0066cc; font-weight: bold;">ECO PUMP AFRIK</div>
-                  <div style="font-size: 16px; color: #666; margin-top: 5px;">Gestion Intelligente</div>
+                  <h1>ECO PUMP AFRIK</h1>
+                  <p>Gestion Intelligente</p>
                 </div>
                 <div class="company-info">
-                  <div><strong>ECO PUMP AFRIK</strong></div>
+                  <div>ECO PUMP AFRIK</div>
                   <div>Tél: +225 0748576956 / +225 0707806359</div>
                   <div>Email: ouanlo.ouattara@ecopumpafrik.com</div>
                   <div>Cocody - Angré 7e Tranche</div>
@@ -287,13 +486,13 @@ function App() {
               
               <div class="doc-title">${docType}</div>
               <div class="doc-number">N° ${numero}</div>
-              <div style="text-align: right; margin-bottom: 20px; font-size: 14px;">
+              <div class="doc-date">
                 Date: ${formatDate(document.date_devis || document.date_facture)}
               </div>
               
               <div class="client-info">
                 <div class="client-title">FACTURER À :</div>
-                <div><strong>${document.client_nom}</strong></div>
+                <div class="client-name">${document.client_nom}</div>
                 ${document.reference_commande ? `<div>Référence: ${document.reference_commande}</div>` : ''}
               </div>
               
@@ -314,7 +513,7 @@ function App() {
                       <td>${article.item}</td>
                       <td>${article.ref || ''}</td>
                       <td>${article.designation}</td>
-                      <td>${article.quantite}</td>
+                      <td class="amount">${article.quantite}</td>
                       <td class="amount">${formatCurrency(article.prix_unitaire, document.devise)}</td>
                       <td class="amount">${formatCurrency(article.total, document.devise)}</td>
                     </tr>
@@ -344,11 +543,11 @@ function App() {
               </div>
               
               <div class="conditions">
-                <div style="margin-bottom: 10px;"><strong>MODALITÉS :</strong></div>
-                ${document.delai_livraison ? `<div>Délai de livraison: ${document.delai_livraison}</div>` : ''}
-                ${document.conditions_paiement ? `<div>Conditions de paiement: ${document.conditions_paiement}</div>` : ''}
-                ${document.mode_livraison ? `<div>Mode de livraison: ${document.mode_livraison}</div>` : ''}
-                <div style="margin-top: 15px; font-style: italic;">
+                <div class="conditions-title">MODALITÉS :</div>
+                ${document.delai_livraison ? `<div><strong>Délai de livraison:</strong> ${document.delai_livraison}</div>` : ''}
+                ${document.conditions_paiement ? `<div><strong>Conditions de paiement:</strong> ${document.conditions_paiement}</div>` : ''}
+                ${document.mode_livraison ? `<div><strong>Mode de livraison:</strong> ${document.mode_livraison}</div>` : ''}
+                <div class="note">
                   "Nos commandes se veulent fermes et irrévocables"
                 </div>
               </div>
@@ -362,26 +561,28 @@ function App() {
               </div>
             </div>
             
-            <div style="text-align: center; margin: 20px; padding: 20px;">
-              <button onclick="window.print()" style="background: #0066cc; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px;">
+            <div class="no-print" style="text-align: center; margin: 30px; padding: 20px;">
+              <button onclick="window.print()" style="background: #0066cc; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 15px; box-shadow: 0 2px 10px rgba(0,102,204,0.3);">
                 🖨️ Imprimer
               </button>
-              <button onclick="window.close()" style="background: #666; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 16px; cursor: pointer;">
-                Fermer
+              <button onclick="window.close()" style="background: #666; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 2px 10px rgba(102,102,102,0.3);">
+                ✖️ Fermer
               </button>
             </div>
           </body>
           </html>
-        `);
+        `;
+        
+        newWindow.document.write(docHTML);
         newWindow.document.close();
       } else {
         // For other document types, show a simple alert
-        alert(`Détails ${type}:\nID: ${document.client_id || document.fournisseur_id || document.article_id}\nNom: ${document.nom || document.designation}\nDate: ${formatDate(document.created_at)}`);
+        alert(`📋 Détails ${type}:\n\n✓ ID: ${document.client_id || document.fournisseur_id || document.article_id}\n✓ Nom: ${document.nom || document.designation}\n✓ Date: ${formatDate(document.created_at)}`);
       }
       
     } catch (error) {
       console.error(`Error viewing ${type}:`, error);
-      alert(`Erreur lors de la visualisation: ${error.response?.data?.detail || error.message}`);
+      alert(`❌ Erreur lors de la visualisation: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }
