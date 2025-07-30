@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from './components/ui/alert';
 import { 
   Plus, Users, FileText, Euro, DollarSign, Eye, Edit, Trash2, Download, 
   Search, Package, CreditCard, TrendingUp, AlertTriangle, Building2,
-  ShoppingCart, Receipt, BarChart3, FileCheck, ArrowRightLeft
+  ShoppingCart, Receipt, BarChart3, FileCheck, ArrowRightLeft, Calendar
 } from 'lucide-react';
 import './App.css';
 
