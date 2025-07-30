@@ -761,6 +761,481 @@ async def get_dashboard_stats():
         logger.error(f"Error fetching dashboard stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/pdf/liste/factures-impayees")
+async def generate_liste_factures_impayees(date_debut: str = None, date_fin: str = None):
+    """Generate PDF list of unpaid invoices for a given period"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if date_debut and date_fin:
+            try:
+                debut = datetime.fromisoformat(date_debut)
+                fin = datetime.fromisoformat(date_fin)
+                date_filter = {
+                    "$gte": debut.isoformat(),
+                    "$lte": fin.isoformat()
+                }
+            except:
+                date_filter = {}
+        
+        # Get unpaid invoices for the period
+        query = {"statut_paiement": {"$ne": "payé"}}
+        if date_filter:
+            query["date_facture"] = date_filter
+        
+        factures_impayees = list(factures_collection.find(query).sort("date_facture", -1))
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Professional logo header
+            logo_table_data = [
+                ["", "ECO PUMP AFRIK", ""],
+                ["", "Solutions Hydrauliques Professionnelles", ""]
+            ]
+            
+            logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
+            logo_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
+                ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (1, 0), (1, 0), 28),
+                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
+                ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+                ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
+                ('FONTSIZE', (1, 1), (1, 1), 14),
+                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
+                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
+                ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
+                ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
+                ('TOPPADDING', (0, 0), (-1, -1), 15),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+            ]))
+            
+            story.append(logo_table)
+            story.append(Spacer(1, 10))
+            
+            # Report title
+            title_style = styles['Heading1']
+            title_style.fontSize = 22
+            title_style.textColor = colors.HexColor('#dc3545')  # Red for unpaid
+            title_style.alignment = 1  # Center
+            
+            period_text = ""
+            if date_debut and date_fin:
+                period_text = f" - Période: {date_debut} au {date_fin}"
+            
+            story.append(Paragraph(f"LISTE DES FACTURES IMPAYÉES{period_text}", title_style))
+            story.append(Spacer(1, 20))
+            
+            # Summary
+            total_impaye = sum(f.get('total_ttc', 0) - f.get('montant_paye', 0) for f in factures_impayees)
+            
+            summary_data = [
+                ["Nombre de factures impayées", str(len(factures_impayees))],
+                ["Montant total à encaisser", f"{total_impaye:,.0f} F CFA"],
+                ["Date de génération", datetime.now().strftime("%d/%m/%Y à %H:%M:%S")]
+            ]
+            
+            summary_table = Table(summary_data, colWidths=[200, 280])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#ffe6e6')),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#dc3545')),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 12),
+                ('PADDING', (0, 0), (-1, -1), 10),
+                ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ]))
+            
+            story.append(summary_table)
+            story.append(Spacer(1, 25))
+            
+            # Detailed list
+            if factures_impayees:
+                facture_data = [["N° Facture", "Client", "Date", "Total TTC", "Payé", "Reste à payer", "Retard"]]
+                
+                for f in factures_impayees:
+                    date_facture = datetime.fromisoformat(f.get('date_facture', ''))
+                    jours_retard = (datetime.now().date() - date_facture.date()).days
+                    
+                    # Truncate long client names
+                    client_nom = f.get('client_nom', '')
+                    if len(client_nom) > 25:
+                        client_nom = client_nom[:25] + "..."
+                    
+                    facture_data.append([
+                        f.get('numero_facture', '')[:18],
+                        client_nom,
+                        f.get('date_facture', '')[:10],
+                        f"{f.get('total_ttc', 0):,.0f}",
+                        f"{f.get('montant_paye', 0):,.0f}",
+                        f"{f.get('total_ttc', 0) - f.get('montant_paye', 0):,.0f}",
+                        f"{jours_retard}j" if jours_retard > 30 else f"{jours_retard}j"
+                    ])
+                
+                detail_table = Table(facture_data, colWidths=[85, 120, 55, 60, 60, 70, 30])
+                detail_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc3545')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Left align client names
+                    ('ALIGN', (3, 1), (-1, -1), 'RIGHT'),  # Right align amounts
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 8),
+                    ('FONTSIZE', (0, 1), (-1, -1), 7),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(detail_table)
+            else:
+                story.append(Paragraph("✅ Aucune facture impayée pour la période sélectionnée", styles['Normal']))
+            
+            story.append(Spacer(1, 30))
+            
+            # Footer
+            footer_style = styles['Normal']
+            footer_style.fontSize = 8
+            footer_style.textColor = colors.HexColor('#666666')
+            
+            story.append(Paragraph("─" * 80, footer_style))
+            story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
+            story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
+            story.append(Paragraph("Tél: +225 0707806359", footer_style))
+            story.append(Paragraph("Email: contact@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            
+            doc.build(story)
+            
+            return FileResponse(
+                tmp_file.name,
+                media_type='application/pdf',
+                filename=f"ECO_PUMP_AFRIK_Factures_Impayees_{date.today().isoformat()}.pdf"
+            )
+            
+    except Exception as e:
+        logger.error(f"Error generating unpaid invoices list: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération: {str(e)}")
+
+@app.get("/api/pdf/liste/factures")
+async def generate_liste_factures(date_debut: str = None, date_fin: str = None):
+    """Generate PDF list of all invoices for a given period"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if date_debut and date_fin:
+            try:
+                debut = datetime.fromisoformat(date_debut)
+                fin = datetime.fromisoformat(date_fin)
+                date_filter = {
+                    "$gte": debut.isoformat(),
+                    "$lte": fin.isoformat()
+                }
+            except:
+                date_filter = {}
+        
+        # Get all invoices for the period
+        query = {}
+        if date_filter:
+            query["date_facture"] = date_filter
+        
+        factures_liste = list(factures_collection.find(query).sort("date_facture", -1))
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Professional logo header (same as above)
+            logo_table_data = [
+                ["", "ECO PUMP AFRIK", ""],
+                ["", "Solutions Hydrauliques Professionnelles", ""]
+            ]
+            
+            logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
+            logo_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
+                ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (1, 0), (1, 0), 28),
+                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
+                ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+                ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
+                ('FONTSIZE', (1, 1), (1, 1), 14),
+                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
+                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
+                ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
+                ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
+                ('TOPPADDING', (0, 0), (-1, -1), 15),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+            ]))
+            
+            story.append(logo_table)
+            story.append(Spacer(1, 10))
+            
+            # Report title
+            title_style = styles['Heading1']
+            title_style.fontSize = 22
+            title_style.textColor = colors.HexColor('#0066cc')
+            title_style.alignment = 1  # Center
+            
+            period_text = ""
+            if date_debut and date_fin:
+                period_text = f" - Période: {date_debut} au {date_fin}"
+            
+            story.append(Paragraph(f"LISTE DES FACTURES{period_text}", title_style))
+            story.append(Spacer(1, 20))
+            
+            # Summary
+            total_factures = sum(f.get('total_ttc', 0) for f in factures_liste)
+            total_paye = sum(f.get('montant_paye', 0) for f in factures_liste)
+            nb_payees = len([f for f in factures_liste if f.get('statut_paiement') == 'payé'])
+            
+            summary_data = [
+                ["Nombre total de factures", str(len(factures_liste))],
+                ["Factures payées", f"{nb_payees} ({nb_payees/len(factures_liste)*100:.1f}%)" if factures_liste else "0"],
+                ["Chiffre d'affaires total", f"{total_factures:,.0f} F CFA"],
+                ["Montant encaissé", f"{total_paye:,.0f} F CFA"],
+                ["Reste à encaisser", f"{total_factures - total_paye:,.0f} F CFA"]
+            ]
+            
+            summary_table = Table(summary_data, colWidths=[200, 280])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e6f3ff')),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0066cc')),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 11),
+                ('PADDING', (0, 0), (-1, -1), 8),
+                ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ]))
+            
+            story.append(summary_table)
+            story.append(Spacer(1, 25))
+            
+            # Detailed list
+            if factures_liste:
+                facture_data = [["N° Facture", "Client", "Date", "Total TTC", "Statut", "Devise"]]
+                
+                for f in factures_liste:
+                    # Truncate long client names
+                    client_nom = f.get('client_nom', '')
+                    if len(client_nom) > 30:
+                        client_nom = client_nom[:30] + "..."
+                    
+                    statut_color = "✅" if f.get('statut_paiement') == 'payé' else "❌"
+                    
+                    facture_data.append([
+                        f.get('numero_facture', '')[:20],
+                        client_nom,
+                        f.get('date_facture', '')[:10],
+                        f"{f.get('total_ttc', 0):,.0f}",
+                        f"{statut_color} {f.get('statut_paiement', '')}",
+                        f.get('devise', '')
+                    ])
+                
+                detail_table = Table(facture_data, colWidths=[90, 150, 55, 70, 80, 35])
+                detail_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Left align client names
+                    ('ALIGN', (3, 1), (3, -1), 'RIGHT'),  # Right align amounts
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 8),
+                    ('FONTSIZE', (0, 1), (-1, -1), 7),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(detail_table)
+            else:
+                story.append(Paragraph("Aucune facture trouvée pour la période sélectionnée", styles['Normal']))
+            
+            story.append(Spacer(1, 30))
+            
+            # Footer
+            footer_style = styles['Normal']
+            footer_style.fontSize = 8
+            footer_style.textColor = colors.HexColor('#666666')
+            
+            story.append(Paragraph("─" * 80, footer_style))
+            story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
+            story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
+            story.append(Paragraph("Tél: +225 0707806359", footer_style))
+            story.append(Paragraph("Email: contact@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            
+            doc.build(story)
+            
+            return FileResponse(
+                tmp_file.name,
+                media_type='application/pdf',
+                filename=f"ECO_PUMP_AFRIK_Liste_Factures_{date.today().isoformat()}.pdf"
+            )
+            
+    except Exception as e:
+        logger.error(f"Error generating invoices list: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération: {str(e)}")
+
+@app.get("/api/pdf/liste/devis")
+async def generate_liste_devis(date_debut: str = None, date_fin: str = None):
+    """Generate PDF list of all quotes for a given period"""
+    try:
+        # Build date filter
+        date_filter = {}
+        if date_debut and date_fin:
+            try:
+                debut = datetime.fromisoformat(date_debut)
+                fin = datetime.fromisoformat(date_fin)
+                date_filter = {
+                    "$gte": debut.isoformat(),
+                    "$lte": fin.isoformat()
+                }
+            except:
+                date_filter = {}
+        
+        # Get all quotes for the period
+        query = {}
+        if date_filter:
+            query["date_devis"] = date_filter
+        
+        devis_liste = list(devis_collection.find(query).sort("date_devis", -1))
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Professional logo header
+            logo_table_data = [
+                ["", "ECO PUMP AFRIK", ""],
+                ["", "Solutions Hydrauliques Professionnelles", ""]
+            ]
+            
+            logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
+            logo_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),
+                ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (1, 0), (1, 0), 28),
+                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),
+                ('ALIGN', (1, 0), (1, 0), 'CENTER'),
+                ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
+                ('FONTSIZE', (1, 1), (1, 1), 14),
+                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),
+                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
+                ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
+                ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),
+                ('TOPPADDING', (0, 0), (-1, -1), 15),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+            ]))
+            
+            story.append(logo_table)
+            story.append(Spacer(1, 10))
+            
+            # Report title
+            title_style = styles['Heading1']
+            title_style.fontSize = 22
+            title_style.textColor = colors.HexColor('#28a745')  # Green for quotes
+            title_style.alignment = 1  # Center
+            
+            period_text = ""
+            if date_debut and date_fin:
+                period_text = f" - Période: {date_debut} au {date_fin}"
+            
+            story.append(Paragraph(f"LISTE DES DEVIS{period_text}", title_style))
+            story.append(Spacer(1, 20))
+            
+            # Summary
+            total_devis = sum(d.get('total_ttc', 0) for d in devis_liste)
+            nb_acceptes = len([d for d in devis_liste if d.get('statut') == 'accepté'])
+            nb_refuses = len([d for d in devis_liste if d.get('statut') == 'refusé'])
+            
+            summary_data = [
+                ["Nombre total de devis", str(len(devis_liste))],
+                ["Devis acceptés", f"{nb_acceptes} ({nb_acceptes/len(devis_liste)*100:.1f}%)" if devis_liste else "0"],
+                ["Devis refusés", f"{nb_refuses} ({nb_refuses/len(devis_liste)*100:.1f}%)" if devis_liste else "0"],
+                ["Valeur totale des devis", f"{total_devis:,.0f} F CFA"],
+                ["Taux de conversion", f"{nb_acceptes/len(devis_liste)*100:.1f}%" if devis_liste else "0%"]
+            ]
+            
+            summary_table = Table(summary_data, colWidths=[200, 280])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e6ffe6')),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#28a745')),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 11),
+                ('PADDING', (0, 0), (-1, -1), 8),
+                ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ]))
+            
+            story.append(summary_table)
+            story.append(Spacer(1, 25))
+            
+            # Detailed list
+            if devis_liste:
+                devis_data = [["N° Devis", "Client", "Date", "Total TTC", "Statut", "Devise"]]
+                
+                for d in devis_liste:
+                    # Truncate long client names
+                    client_nom = d.get('client_nom', '')
+                    if len(client_nom) > 30:
+                        client_nom = client_nom[:30] + "..."
+                    
+                    statut_icon = {"accepté": "✅", "refusé": "❌", "en_attente": "⏳"}.get(d.get('statut', ''), "❓")
+                    
+                    devis_data.append([
+                        d.get('numero_devis', '')[:20],
+                        client_nom,
+                        d.get('date_devis', '')[:10],
+                        f"{d.get('total_ttc', 0):,.0f}",
+                        f"{statut_icon} {d.get('statut', '')}",
+                        d.get('devise', '')
+                    ])
+                
+                detail_table = Table(devis_data, colWidths=[90, 150, 55, 70, 80, 35])
+                detail_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#28a745')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Left align client names
+                    ('ALIGN', (3, 1), (3, -1), 'RIGHT'),  # Right align amounts
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 8),
+                    ('FONTSIZE', (0, 1), (-1, -1), 7),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                story.append(detail_table)
+            else:
+                story.append(Paragraph("Aucun devis trouvé pour la période sélectionnée", styles['Normal']))
+            
+            story.append(Spacer(1, 30))
+            
+            # Footer
+            footer_style = styles['Normal']
+            footer_style.fontSize = 8
+            footer_style.textColor = colors.HexColor('#666666')
+            
+            story.append(Paragraph("─" * 80, footer_style))
+            story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
+            story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
+            story.append(Paragraph("Tél: +225 0707806359", footer_style))
+            story.append(Paragraph("Email: contact@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            
+            doc.build(story)
+            
+            return FileResponse(
+                tmp_file.name,
+                media_type='application/pdf',
+                filename=f"ECO_PUMP_AFRIK_Liste_Devis_{date.today().isoformat()}.pdf"
+            )
+            
+    except Exception as e:
+        logger.error(f"Error generating quotes list: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération: {str(e)}")
+
 # ========================================
 # PDF GENERATION ENDPOINTS
 # ========================================
