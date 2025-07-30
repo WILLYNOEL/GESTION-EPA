@@ -1838,75 +1838,119 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Dialog>
             </div>
 
+            {/* Intelligent Search Interface */}
             <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom/Raison Sociale</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Identifiants</TableHead>
-                      <TableHead>Devise</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Date Création</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients.map((client) => (
-                      <TableRow key={client.client_id}>
-                        <TableCell className="font-medium">
-                          <div>
-                            <p>{client.nom}</p>
-                            {client.conditions_paiement && (
-                              <p className="text-xs text-muted-foreground">
-                                Conditions: {client.conditions_paiement}
-                              </p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {client.telephone && <p className="text-sm">{client.telephone}</p>}
-                            {client.email && <p className="text-xs text-muted-foreground">{client.email}</p>}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {client.numero_cc && <p className="text-xs">CC: {client.numero_cc}</p>}
-                            {client.numero_rc && <p className="text-xs">RC: {client.numero_rc}</p>}
-                            {client.nif && <p className="text-xs">NIF: {client.nif}</p>}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={client.devise === 'EUR' ? 'default' : 'secondary'}>
-                            {client.devise}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{client.type_client}</Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(client.created_at)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
-                            <Button size="sm" variant="outline" onClick={() => handleEditClient(client)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleDeleteClient(client.client_id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="mr-2 h-5 w-5" />
+                  Recherche de Clients Intelligente
+                </CardTitle>
+                <CardDescription>
+                  Recherchez par nom, email ou téléphone pour afficher les clients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Tapez le nom, email ou téléphone du client..."
+                    value={clientsSearch}
+                    onChange={(e) => setClientsSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleClientsSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setClientsSearch('');
+                      setShowClientsData(true);
+                    }}
+                  >
+                    Voir Tout ({clients.length})
+                  </Button>
+                </div>
               </CardContent>
             </Card>
+
+            {/* Results Display */}
+            {showClientsData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Résultats ({getFilteredClients().length} client{getFilteredClients().length > 1 ? 's' : ''})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nom/Raison Sociale</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Identifiants</TableHead>
+                        <TableHead>Devise</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Date Création</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getFilteredClients().map((client) => (
+                        <TableRow key={client.client_id}>
+                          <TableCell className="font-medium">
+                            <div>
+                              <p>{client.nom}</p>
+                              {client.conditions_paiement && (
+                                <p className="text-xs text-muted-foreground">
+                                  Conditions: {client.conditions_paiement}
+                                </p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {client.telephone && <p className="text-sm">{client.telephone}</p>}
+                              {client.email && <p className="text-xs text-muted-foreground">{client.email}</p>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {client.numero_cc && <p className="text-xs">CC: {client.numero_cc}</p>}
+                              {client.numero_rc && <p className="text-xs">RC: {client.numero_rc}</p>}
+                              {client.nif && <p className="text-xs">NIF: {client.nif}</p>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={client.devise === 'EUR' ? 'default' : 'secondary'}>
+                              {client.devise}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{client.type_client}</Badge>
+                          </TableCell>
+                          <TableCell>{formatDate(client.created_at)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button size="sm" variant="outline" onClick={() => handleEditClient(client)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleDeleteClient(client.client_id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Similar extensive implementations for other tabs would continue here... */}
