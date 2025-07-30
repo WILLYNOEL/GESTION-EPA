@@ -812,28 +812,37 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
                     story.append(Paragraph(f"<b>Référence commande:</b> {document['reference_commande']}", styles['Normal']))
                 story.append(Spacer(1, 15))
                 
-                # Articles table
-                article_data = [["Item", "Référence", "Désignation", "Quantité", "Prix Unitaire", "Total"]]
+                # Articles table with proper column widths
+                article_data = [["Item", "Réf", "Désignation", "Qté", "P.U.", "Total"]]
                 for article in document.get('articles', []):
+                    # Truncate long designations to fit in column
+                    designation = article['designation']
+                    if len(designation) > 25:
+                        designation = designation[:25] + "..."
+                    
                     article_data.append([
                         str(article['item']),
-                        article.get('ref', ''),
-                        article['designation'],
+                        article.get('ref', '')[:8] if article.get('ref') else '',  # Limit ref to 8 chars
+                        designation,
                         str(article['quantite']),
-                        f"{article['prix_unitaire']:,.2f} {document['devise']}",
-                        f"{article['total']:,.2f} {document['devise']}"
+                        f"{article['prix_unitaire']:,.0f}",
+                        f"{article['total']:,.0f}"
                     ])
                 
-                table = Table(article_data)
+                # Define column widths to prevent overflow (total width = 480)
+                table = Table(article_data, colWidths=[30, 50, 180, 40, 80, 100])
                 table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (2, 1), (2, -1), 'LEFT'),  # Left align designation
+                    ('ALIGN', (4, 1), (-1, -1), 'RIGHT'), # Right align prices
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
                     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
                     ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('WORDWRAP', (2, 1), (2, -1), 1)  # Enable word wrap for designation
                 ]))
                 story.append(table)
                 story.append(Spacer(1, 20))
