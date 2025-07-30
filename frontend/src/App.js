@@ -2506,90 +2506,142 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Dialog>
             </div>
 
+            {/* Interface de Recherche Intelligente pour Fournisseurs */}
             <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom/Raison Sociale</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Identifiants</TableHead>
-                      <TableHead>Devise</TableHead>
-                      <TableHead>Conditions Paiement</TableHead>
-                      <TableHead>Date Création</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fournisseurs.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          <Building2 className="mx-auto h-12 w-12 mb-2" />
-                          <p>Aucun fournisseur enregistré</p>
-                          <p className="text-sm">Ajoutez votre premier fournisseur pour commencer</p>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      fournisseurs.map((fournisseur) => (
-                        <TableRow key={fournisseur.fournisseur_id}>
-                          <TableCell className="font-medium">
-                            <div>
-                              <p>{fournisseur.nom}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {fournisseur.telephone && <p className="text-sm">{fournisseur.telephone}</p>}
-                              {fournisseur.email && <p className="text-xs text-muted-foreground">{fournisseur.email}</p>}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {fournisseur.numero_cc && <p className="text-xs">CC: {fournisseur.numero_cc}</p>}
-                              {fournisseur.numero_rc && <p className="text-xs">RC: {fournisseur.numero_rc}</p>}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={fournisseur.devise === 'EUR' ? 'default' : 'secondary'}>
-                              {fournisseur.devise}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-sm">{fournisseur.conditions_paiement || 'Non défini'}</p>
-                          </TableCell>
-                          <TableCell>{formatDate(fournisseur.created_at)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleViewDocument('fournisseur', fournisseur.fournisseur_id)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleEditFournisseur(fournisseur.fournisseur_id)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleDeleteFournisseur(fournisseur.fournisseur_id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="mr-2 h-5 w-5" />
+                  Recherche de Fournisseurs Intelligente
+                </CardTitle>
+                <CardDescription>
+                  Recherchez par nom ou email pour afficher les fournisseurs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Tapez le nom ou email du fournisseur..."
+                    value={fournisseursSearch}
+                    onChange={(e) => setFournisseursSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleFournisseursSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setFournisseursSearch('');
+                      setShowFournisseursData(true);
+                    }}
+                  >
+                    Voir Tout ({fournisseurs.length})
+                  </Button>
+                  {showFournisseursData && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowFournisseursData(false)}
+                    >
+                      Masquer Tout
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
+
+            {/* Affichage des Résultats */}
+            {showFournisseursData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Résultats ({getFilteredFournisseurs().length} fournisseur{getFilteredFournisseurs().length > 1 ? 's' : ''})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nom/Raison Sociale</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Identifiants</TableHead>
+                        <TableHead>Devise</TableHead>
+                        <TableHead>Conditions Paiement</TableHead>
+                        <TableHead>Date Création</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getFilteredFournisseurs().length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            <Building2 className="mx-auto h-12 w-12 mb-2" />
+                            <p>Aucun fournisseur trouvé</p>
+                            <p className="text-sm">Essayez une recherche différente</p>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        getFilteredFournisseurs().map((fournisseur) => (
+                          <TableRow key={fournisseur.fournisseur_id}>
+                            <TableCell className="font-medium">
+                              <div>
+                                <p>{fournisseur.nom}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {fournisseur.telephone && <p className="text-sm">{fournisseur.telephone}</p>}
+                                {fournisseur.email && <p className="text-xs text-muted-foreground">{fournisseur.email}</p>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {fournisseur.numero_cc && <p className="text-xs">CC: {fournisseur.numero_cc}</p>}
+                                {fournisseur.numero_rc && <p className="text-xs">RC: {fournisseur.numero_rc}</p>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={fournisseur.devise === 'EUR' ? 'default' : 'secondary'}>
+                                {fournisseur.devise}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <p className="text-sm">{fournisseur.conditions_paiement || 'Non défini'}</p>
+                            </TableCell>
+                            <TableCell>{formatDate(fournisseur.created_at)}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewDocument('fournisseur', fournisseur.fournisseur_id)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleEditFournisseur(fournisseur.fournisseur_id)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleDeleteFournisseur(fournisseur.fournisseur_id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Factures Tab - Complete Implementation */}
