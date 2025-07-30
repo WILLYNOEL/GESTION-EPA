@@ -2862,9 +2862,11 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Card>
             )}
           </TabsContent>
+          )}
 
           {/* Factures Tab - Complete Implementation */}
-          <TabsContent value="factures" className="space-y-6">
+          {hasPermission('factures') && (
+            <TabsContent value="factures" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Gestion des Factures</h2>
               <Dialog open={isFactureDialogOpen} onOpenChange={setIsFactureDialogOpen}>
