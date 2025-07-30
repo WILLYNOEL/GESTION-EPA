@@ -2823,6 +2823,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
                             <SelectItem value="ex-works">Ex-Works (départ usine)</SelectItem>
                             <SelectItem value="livraison-incluse">Livraison incluse</SelectItem>
                             <SelectItem value="franco-domicile">Franco domicile</SelectItem>
+                            <SelectItem value="collecte-client">Collecte par le client</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
