@@ -2338,13 +2338,15 @@ ECO PUMP AFRIK - Tous droits réservés`;
                                   size="sm" 
                                   variant="outline"
                                   onClick={() => {
+                                    // Reset form first, then set values
                                     setPaiementForm({
-                                      ...paiementForm,
                                       type_document: 'facture',
                                       document_id: f.facture_id,
                                       client_id: f.client_id,
+                                      montant: f.total_ttc - (f.montant_paye || 0),
                                       devise: f.devise,
-                                      montant: f.total_ttc - (f.montant_paye || 0)
+                                      mode_paiement: 'espèce',
+                                      reference_paiement: ''
                                     });
                                     setIsPaiementDialogOpen(true);
                                   }}
