@@ -1876,6 +1876,14 @@ ECO PUMP AFRIK - Tous droits réservés`;
                   >
                     Voir Tout ({clients.length})
                   </Button>
+                  {showClientsData && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowClientsData(false)}
+                    >
+                      Masquer Tout
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
