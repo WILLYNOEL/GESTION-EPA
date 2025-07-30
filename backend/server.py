@@ -683,6 +683,356 @@ async def get_dashboard_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 # ========================================
+# PDF GENERATION ENDPOINTS
+# ========================================
+@app.get("/api/pdf/document/{doc_type}/{doc_id}")
+async def generate_document_pdf(doc_type: str, doc_id: str):
+    """Generate PDF for devis, facture or paiement"""
+    try:
+        # Get document data
+        if doc_type == "devis":
+            document = devis_collection.find_one({"devis_id": doc_id})
+            if not document:
+                raise HTTPException(status_code=404, detail="Devis non trouvé")
+            doc_title = "DEVIS"
+            doc_number = document["numero_devis"]
+            doc_date = document["date_devis"]
+            
+        elif doc_type == "facture":
+            document = factures_collection.find_one({"facture_id": doc_id})
+            if not document:
+                raise HTTPException(status_code=404, detail="Facture non trouvée") 
+            doc_title = "FACTURE"
+            doc_number = document["numero_facture"]
+            doc_date = document["date_facture"]
+            
+        elif doc_type == "paiement":
+            document = paiements_collection.find_one({"paiement_id": doc_id})
+            if not document:
+                raise HTTPException(status_code=404, detail="Paiement non trouvé")
+            doc_title = "REÇU DE PAIEMENT"
+            doc_number = f"RECU-{doc_id[:8]}"
+            doc_date = document["date_paiement"]
+        else:
+            raise HTTPException(status_code=400, detail="Type de document non valide")
+
+        # Create PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Header with ECO PUMP AFRIK branding
+            header_style = styles['Title']
+            header_style.fontSize = 24
+            header_style.textColor = colors.HexColor('#0066cc')
+            
+            story.append(Paragraph("ECO PUMP AFRIK", header_style))
+            story.append(Paragraph("Gestion Intelligente", styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Document title
+            title_style = styles['Heading1']
+            title_style.fontSize = 20
+            title_style.textColor = colors.HexColor('#333333')
+            story.append(Paragraph(f"{doc_title} - {doc_number}", title_style))
+            story.append(Paragraph(f"Date: {doc_date}", styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            if doc_type in ["devis", "facture"]:
+                # Client info
+                story.append(Paragraph(f"<b>Client:</b> {document['client_nom']}", styles['Normal']))
+                if document.get('reference_commande'):
+                    story.append(Paragraph(f"<b>Référence commande:</b> {document['reference_commande']}", styles['Normal']))
+                story.append(Spacer(1, 15))
+                
+                # Articles table
+                article_data = [["Item", "Référence", "Désignation", "Quantité", "Prix Unitaire", "Total"]]
+                for article in document.get('articles', []):
+                    article_data.append([
+                        str(article['item']),
+                        article.get('ref', ''),
+                        article['designation'],
+                        str(article['quantite']),
+                        f"{article['prix_unitaire']:,.2f} {document['devise']}",
+                        f"{article['total']:,.2f} {document['devise']}"
+                    ])
+                
+                table = Table(article_data)
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(table)
+                story.append(Spacer(1, 20))
+                
+                # Totals
+                story.append(Paragraph(f"<b>Sous-total:</b> {document['sous_total']:,.2f} {document['devise']}", styles['Normal']))
+                story.append(Paragraph(f"<b>TVA (18%):</b> {document['tva']:,.2f} {document['devise']}", styles['Normal']))
+                story.append(Paragraph(f"<b>TOTAL TTC:</b> {document['total_ttc']:,.2f} {document['devise']}", styles['Heading2']))
+                story.append(Spacer(1, 15))
+                
+                # Terms and conditions
+                if document.get('delai_livraison'):
+                    story.append(Paragraph(f"<b>Délai de livraison:</b> {document['delai_livraison']}", styles['Normal']))
+                if document.get('conditions_paiement'):
+                    story.append(Paragraph(f"<b>Conditions de paiement:</b> {document['conditions_paiement']}", styles['Normal']))
+                if document.get('mode_livraison'):
+                    story.append(Paragraph(f"<b>Mode de livraison:</b> {document['mode_livraison']}", styles['Normal']))
+                
+            else:  # paiement
+                story.append(Paragraph(f"<b>Montant:</b> {document['montant']:,.2f} {document['devise']}", styles['Heading2']))
+                story.append(Paragraph(f"<b>Mode de paiement:</b> {document['mode_paiement']}", styles['Normal']))
+                if document.get('reference_paiement'):
+                    story.append(Paragraph(f"<b>Référence:</b> {document['reference_paiement']}", styles['Normal']))
+                if document.get('client_id'):
+                    client = clients_collection.find_one({"client_id": document['client_id']})
+                    if client:
+                        story.append(Paragraph(f"<b>Client:</b> {client['nom']}", styles['Normal']))
+            
+            story.append(Spacer(1, 30))
+            
+            # Footer with company info
+            footer_style = styles['Normal']
+            footer_style.fontSize = 8
+            footer_style.textColor = colors.HexColor('#666666')
+            
+            story.append(Paragraph("─" * 80, footer_style))
+            story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
+            story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
+            story.append(Paragraph("Tél: +225 0748576956 / +225 0707806359", footer_style))
+            story.append(Paragraph("Email: ouanlo.ouattara@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            story.append(Paragraph("RCCM: CI-ABJ-2024-B-12345 | N°CC: 2407891H", footer_style))
+            
+            doc.build(story)
+            
+            return FileResponse(
+                tmp_file.name,
+                media_type='application/pdf',
+                filename=f"{doc_title}_{doc_number}_{date.today().isoformat()}.pdf"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating PDF: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération du PDF: {str(e)}")
+
+@app.get("/api/pdf/rapport/{report_type}")
+async def generate_report_pdf(report_type: str):
+    """Generate professional PDF reports"""
+    try:
+        # Get data for reports
+        current_month_start = datetime.now().replace(day=1)
+        
+        clients_data = list(clients_collection.find({}))
+        factures_data = list(factures_collection.find({}).sort("created_at", -1))
+        devis_data = list(devis_collection.find({}).sort("created_at", -1))
+        paiements_data = list(paiements_collection.find({}).sort("created_at", -1))
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            doc = SimpleDocTemplate(tmp_file.name, pagesize=A4)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Header with ECO PUMP AFRIK branding
+            header_style = styles['Title']
+            header_style.fontSize = 22
+            header_style.textColor = colors.HexColor('#0066cc')
+            
+            story.append(Paragraph("ECO PUMP AFRIK", header_style))
+            story.append(Paragraph("Gestion Intelligente", styles['Normal']))
+            story.append(Spacer(1, 15))
+            
+            # Report title
+            title_style = styles['Heading1']
+            title_style.fontSize = 18
+            title_style.textColor = colors.HexColor('#333333')
+            
+            if report_type == "journal_ventes":
+                story.append(Paragraph("JOURNAL DES VENTES", title_style))
+                story.append(Paragraph(f"Période: {date.today().strftime('%B %Y')}", styles['Normal']))
+                story.append(Spacer(1, 20))
+                
+                # Sales summary table
+                summary_data = [
+                    ["Indicateur", "Valeur"],
+                    ["Nombre de factures", str(len(factures_data))],
+                    ["Chiffre d'affaires", f"{sum(f.get('total_ttc', 0) for f in factures_data):,.2f} F CFA"],
+                    ["TVA collectée", f"{sum(f.get('tva', 0) for f in factures_data):,.2f} F CFA"],
+                    ["Factures impayées", str(len([f for f in factures_data if f.get('statut_paiement') != 'payé']))],
+                ]
+                
+                table = Table(summary_data)
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(table)
+                story.append(Spacer(1, 20))
+                
+                # Detailed factures table
+                story.append(Paragraph("Détail des Factures", styles['Heading2']))
+                facture_data = [["N° Facture", "Client", "Date", "Montant TTC", "Statut"]]
+                for f in factures_data[:15]:  # Limit to 15 recent invoices
+                    facture_data.append([
+                        f.get('numero_facture', ''),
+                        f.get('client_nom', ''),
+                        f.get('date_facture', ''),
+                        f"{f.get('total_ttc', 0):,.2f} {f.get('devise', 'FCFA')}",
+                        f.get('statut_paiement', '')
+                    ])
+                
+                detail_table = Table(facture_data)
+                detail_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#28a745')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 9),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(detail_table)
+                
+            elif report_type == "balance_clients":
+                story.append(Paragraph("BALANCE CLIENTS", title_style))
+                story.append(Spacer(1, 20))
+                
+                # Client balance table
+                balance_data = [["Client", "Type", "Devise", "Nb Factures", "Total Facturé", "Total Payé", "Solde"]]
+                for client in clients_data:
+                    client_factures = [f for f in factures_data if f.get('client_id') == client.get('client_id')]
+                    total_facture = sum(f.get('total_ttc', 0) for f in client_factures)
+                    total_paye = sum(f.get('montant_paye', 0) for f in client_factures)
+                    solde = total_facture - total_paye
+                    
+                    balance_data.append([
+                        client.get('nom', ''),
+                        client.get('type_client', ''),
+                        client.get('devise', ''),
+                        str(len(client_factures)),
+                        f"{total_facture:,.2f}",
+                        f"{total_paye:,.2f}",
+                        f"{solde:,.2f}"
+                    ])
+                
+                balance_table = Table(balance_data)
+                balance_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 9),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(balance_table)
+                
+            elif report_type == "tresorerie":
+                story.append(Paragraph("SUIVI DE TRÉSORERIE", title_style))
+                story.append(Spacer(1, 20))
+                
+                # Treasury summary
+                total_encaisse = sum(p.get('montant', 0) for p in paiements_data)
+                total_a_encaisser = sum(f.get('total_ttc', 0) - f.get('montant_paye', 0) 
+                                     for f in factures_data if f.get('statut_paiement') != 'payé')
+                
+                tresorerie_data = [
+                    ["Indicateur", "Montant"],
+                    ["Total encaissé", f"{total_encaisse:,.2f} F CFA"],
+                    ["À encaisser", f"{total_a_encaisser:,.2f} F CFA"],
+                    ["Nombre de paiements", str(len(paiements_data))],
+                    ["Factures impayées", str(len([f for f in factures_data if f.get('statut_paiement') != 'payé']))]
+                ]
+                
+                tresorerie_table = Table(tresorerie_data)
+                tresorerie_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffc107')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(tresorerie_table)
+                
+            elif report_type == "compte_resultat":
+                story.append(Paragraph("COMPTE DE RÉSULTAT", title_style))
+                story.append(Spacer(1, 20))
+                
+                # Results summary
+                ca_ttc = sum(f.get('total_ttc', 0) for f in factures_data)
+                tva_collectee = sum(f.get('tva', 0) for f in factures_data)
+                ca_ht = ca_ttc - tva_collectee
+                taux_conversion = (len(factures_data) / len(devis_data) * 100) if devis_data else 0
+                
+                resultat_data = [
+                    ["Poste", "Montant"],
+                    ["Chiffre d'affaires HT", f"{ca_ht:,.2f} F CFA"],
+                    ["TVA collectée (18%)", f"{tva_collectee:,.2f} F CFA"],
+                    ["Chiffre d'affaires TTC", f"{ca_ttc:,.2f} F CFA"],
+                    ["Taux de conversion devis", f"{taux_conversion:.1f}%"],
+                    ["Nombre de clients actifs", str(len(clients_data))]
+                ]
+                
+                resultat_table = Table(resultat_data)
+                resultat_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#17a2b8')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                story.append(resultat_table)
+            
+            story.append(Spacer(1, 30))
+            
+            # Footer with company info
+            footer_style = styles['Normal']
+            footer_style.fontSize = 8
+            footer_style.textColor = colors.HexColor('#666666')
+            
+            story.append(Paragraph("─" * 80, footer_style))
+            story.append(Paragraph(f"Rapport généré le: {datetime.now().strftime('%d/%m/%Y à %H:%M')}", footer_style))
+            story.append(Paragraph("<b>SARL ECO PUMP AFRIK au capital de 1 000 000 F CFA</b>", footer_style))
+            story.append(Paragraph("Siège social: Cocody - Angré 7e Tranche", footer_style))
+            story.append(Paragraph("Tél: +225 0748576956 / +225 0707806359", footer_style))
+            story.append(Paragraph("Email: ouanlo.ouattara@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com", footer_style))
+            story.append(Paragraph("RCCM: CI-ABJ-2024-B-12345 | N°CC: 2407891H", footer_style))
+            
+            doc.build(story)
+            
+            return FileResponse(
+                tmp_file.name,
+                media_type='application/pdf',
+                filename=f"ECO_PUMP_AFRIK_{report_type}_{date.today().isoformat()}.pdf"
+            )
+            
+    except Exception as e:
+        logger.error(f"Error generating report PDF: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération du rapport: {str(e)}")
+
+# ========================================
 # SEARCH ENDPOINTS
 # ========================================
 @app.get("/api/search", response_model=dict)
