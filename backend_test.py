@@ -270,6 +270,113 @@ class EcoPumpAfrikAPITester:
         )
         return success
 
+    def test_convert_devis_to_facture(self):
+        """Test converting devis to facture"""
+        if not self.created_devis_id:
+            print("❌ Skipping - No devis ID available")
+            return False
+            
+        success, response = self.run_test(
+            "Convert Devis to Facture",
+            "POST",
+            f"api/devis/{self.created_devis_id}/convert-to-facture",
+            200
+        )
+        
+        if success and 'facture' in response:
+            facture = response['facture']
+            print(f"✅ Facture created with number: {facture['numero_facture']}")
+            print(f"✅ Devis reference: {facture['devis_id']}")
+        
+        return success
+
+    def test_get_factures(self):
+        """Test getting all factures"""
+        success, response = self.run_test(
+            "Get All Factures",
+            "GET",
+            "api/factures",
+            200
+        )
+        return success
+
+    def test_get_fournisseurs(self):
+        """Test getting all fournisseurs"""
+        success, response = self.run_test(
+            "Get All Fournisseurs",
+            "GET",
+            "api/fournisseurs",
+            200
+        )
+        return success
+
+    def test_create_fournisseur(self):
+        """Test fournisseur creation"""
+        fournisseur_data = {
+            "nom": "FOURNISSEUR TEST SOTICI",
+            "numero_cc": "CC789012",
+            "email": "fournisseur@test.com",
+            "telephone": "+225 0707806361",
+            "adresse": "Zone Industrielle Yopougon",
+            "devise": "FCFA",
+            "conditions_paiement": "60 jours fin de mois"
+        }
+        
+        success, response = self.run_test(
+            "Create Fournisseur",
+            "POST",
+            "api/fournisseurs",
+            200,
+            data=fournisseur_data
+        )
+        return success
+
+    def test_get_stock(self):
+        """Test getting stock"""
+        success, response = self.run_test(
+            "Get Stock",
+            "GET",
+            "api/stock",
+            200
+        )
+        return success
+
+    def test_get_stock_alerts(self):
+        """Test getting stock alerts"""
+        success, response = self.run_test(
+            "Get Stock Alerts",
+            "GET",
+            "api/stock/alerts",
+            200
+        )
+        return success
+
+    def test_get_paiements(self):
+        """Test getting paiements"""
+        success, response = self.run_test(
+            "Get Paiements",
+            "GET",
+            "api/paiements",
+            200
+        )
+        return success
+
+    def test_search_functionality(self):
+        """Test search functionality"""
+        success, response = self.run_test(
+            "Search Documents",
+            "GET",
+            "api/search",
+            200,
+            params={"q": "TEST"}
+        )
+        
+        if success and 'results' in response:
+            results = response['results']
+            print(f"✅ Search found: {len(results.get('clients', []))} clients, {len(results.get('devis', []))} devis, {len(results.get('factures', []))} factures")
+        
+        return success
+
 def main():
     print("🚀 Starting ECO PUMP AFRIK API Tests")
     print("=" * 50)
