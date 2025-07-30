@@ -2113,11 +2113,13 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Card>
             )}
           </TabsContent>
+          )}
 
           {/* Similar extensive implementations for other tabs would continue here... */}
           {/* Due to length constraints, I'll provide the framework with key tabs */}
 
           {/* Devis Tab with Convert to Facture functionality */}
+          {hasPermission('devis') && (
           <TabsContent value="devis" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Gestion des Devis</h2>
