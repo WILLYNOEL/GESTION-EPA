@@ -913,11 +913,29 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
                 if document.get('mode_livraison'):
                     story.append(Paragraph(f"<b>Mode de livraison:</b> {document['mode_livraison']}", styles['Normal']))
                 if document.get('commentaires'):
-                    story.append(Spacer(1, 10))
+                    story.append(Spacer(1, 15))
                     comment_style = styles['Normal']
-                    comment_style.fontSize = 9
-                    comment_style.textColor = colors.HexColor('#444444')
-                    story.append(Paragraph(f"<b>Commentaires:</b> {document['commentaires']}", comment_style))
+                    comment_style.fontSize = 11
+                    comment_style.textColor = colors.HexColor('#2c5530')
+                    comment_style.leftIndent = 20
+                    comment_style.rightIndent = 20
+                    
+                    # Create a bordered box for comments
+                    comment_table = Table([[f"💬 COMMENTAIRES:\n{document['commentaires']}"]], colWidths=[460])
+                    comment_table.setStyle(TableStyle([
+                        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 11),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c5530')),
+                        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fff8')),
+                        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#28a745')),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ('TOPPADDING', (0, 0), (-1, -1), 12),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 15),
+                        ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+                    ]))
+                    story.append(comment_table)
                 
             else:  # paiement
                 story.append(Paragraph(f"<b>Montant:</b> {document['montant']:,.2f} {document['devise']}", styles['Heading2']))
