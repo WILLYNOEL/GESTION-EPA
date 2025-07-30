@@ -224,6 +224,7 @@ class User(BaseModel):
     email: Optional[EmailStr] = None
     role: str = "user"  # admin, user
     is_active: bool = True
+    permissions: dict = {}  # Nouvelles permissions par onglet
     created_at: str = None
     last_login: str = None
 
@@ -236,6 +237,11 @@ class UserCreate(BaseModel):
     password: str
     email: Optional[EmailStr] = None
     role: str = "user"
+    permissions: Optional[dict] = None
+
+class UserPermissions(BaseModel):
+    user_id: str
+    permissions: dict
 
 class Token(BaseModel):
     access_token: str
