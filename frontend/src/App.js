@@ -827,41 +827,71 @@ ECO PUMP AFRIK - Tous droits réservés`;
     }
   };
 
+  // Stock movement state
+  const [stockMovementDialog, setStockMovementDialog] = useState({
+    open: false,
+    article: null,
+    movement: '',
+    reason: '',
+    type: 'in' // 'in' for entry, 'out' for exit
+  });
+
   const handleStockMovement = async (articleId) => {
     const article = stock.find(a => a.article_id === articleId);
     if (!article) return;
     
-    const movement = prompt(`Mouvement de stock pour "${article.designation}":\n\nQuantité actuelle: ${article.quantite_stock}\nStock minimum: ${article.stock_minimum}\n\nEntrez la quantité à ajouter (+) ou retirer (-):`, '0');
+    setStockMovementDialog({
+      open: true,
+      article: article,
+      movement: '',
+      reason: '',
+      type: 'in'
+    });
+  };
+
+  const handleStockMovementSubmit = async (e) => {
+    e.preventDefault();
     
-    if (movement !== null && !isNaN(movement) && movement !== '0') {
-      try {
-        setLoading(true);
-        const newQuantity = parseFloat(article.quantite_stock) + parseFloat(movement);
-        
-        if (newQuantity < 0) {
-          alert('Impossible: Stock ne peut pas être négatif');
-          return;
-        }
-        
-        // Update stock quantity (simulated)
-        await axios.put(`${API_BASE_URL}/api/stock/${articleId}`, {
-          ...article,
-          quantite_stock: newQuantity
-        });
-        
-        fetchAll();
-        
-        const alertMsg = newQuantity <= article.stock_minimum ? 
-          `⚠️ ALERTE: Stock mis à jour ! Nouveau stock: ${newQuantity} (En dessous du minimum: ${article.stock_minimum})` :
-          `✅ Stock mis à jour avec succès ! Nouveau stock: ${newQuantity}`;
-        
-        alert(alertMsg);
-      } catch (error) {
-        console.error('Error updating stock:', error);
-        alert(`Erreur lors de la mise à jour du stock: ${error.response?.data?.detail || error.message}`);
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+      const { article, movement, type, reason } = stockMovementDialog;
+      
+      if (!movement || isNaN(movement) || parseFloat(movement) <= 0) {
+        alert('Veuillez saisir une quantité valide');
+        return;
       }
+      
+      const movementQuantity = parseFloat(movement);
+      const newQuantity = type === 'in' ? 
+        parseFloat(article.quantite_stock) + movementQuantity :
+        parseFloat(article.quantite_stock) - movementQuantity;
+      
+      if (newQuantity < 0) {
+        alert('❌ Impossible: Stock ne peut pas être négatif');
+        return;
+      }
+      
+      // Update stock quantity
+      await axios.put(`${API_BASE_URL}/api/stock/${article.article_id}`, {
+        quantite_stock: newQuantity
+      });
+      
+      await fetchAll();
+      
+      const operationType = type === 'in' ? 'Entrée' : 'Sortie';
+      const alertMsg = newQuantity <= article.stock_minimum ? 
+        `⚠️ ALERTE: ${operationType} enregistrée ! Nouveau stock: ${newQuantity} (En dessous du minimum: ${article.stock_minimum})` :
+        `✅ ${operationType} enregistrée avec succès ! Nouveau stock: ${newQuantity}`;
+      
+      alert(alertMsg + `\nMotif: ${reason || 'Non spécifié'}`);
+      
+      // Close dialog
+      setStockMovementDialog({ open: false, article: null, movement: '', reason: '', type: 'in' });
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      alert(`❌ Erreur lors de la mise à jour du stock: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
