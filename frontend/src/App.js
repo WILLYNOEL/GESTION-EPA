@@ -502,69 +502,184 @@ Référence: ${document.reference_paiement || 'N/A'}
     try {
       setLoading(true);
       
-      // Simulate report generation with real data
-      let reportData = '';
+      let csvData = '';
+      let filename = '';
       
       switch (reportType) {
         case 'Journal des Ventes':
-          reportData = `ECO PUMP AFRIK - JOURNAL DES VENTES
-Période: ${new Date().toLocaleDateString('fr-FR')}
+          csvData = `ECO PUMP AFRIK - JOURNAL DES VENTES
+Date d'édition: ${new Date().toLocaleDateString('fr-FR')}
+Adresse: Cocody - Angré 7e Tranche
+Tel: +225 0707806359 / +225 0748576956
+Email: ouanlo.ouattara@ecopumpafrik.com
 
-${factures.map(f => `${f.numero_facture} | ${f.client_nom} | ${formatCurrency(f.total_ttc, f.devise)} | ${f.statut_paiement}`).join('\n')}
+═══════════════════════════════════════════════════════════════
 
+STATISTIQUES GÉNÉRALES:
 Total Factures: ${factures.length}
-Montant Total: ${formatCurrency(factures.reduce((sum, f) => sum + f.total_ttc, 0))}`;
+Montant Total Facturé: ${formatCurrency(factures.reduce((sum, f) => sum + f.total_ttc, 0))}
+Montant Encaissé: ${formatCurrency(factures.reduce((sum, f) => sum + (f.montant_paye || 0), 0))}
+Montant À Encaisser: ${formatCurrency(factures.reduce((sum, f) => sum + (f.total_ttc - (f.montant_paye || 0)), 0))}
+
+═══════════════════════════════════════════════════════════════
+
+DÉTAIL DES VENTES:
+Numéro Facture,Client,Date,Montant TTC,Devise,Statut Paiement,Montant Payé,Solde Restant
+${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${formatDate(f.date_facture)}","${f.total_ttc}","${f.devise}","${f.statut_paiement}","${f.montant_paye || 0}","${f.total_ttc - (f.montant_paye || 0)}"`).join('\n')}
+
+═══════════════════════════════════════════════════════════════
+SARL au capital de 1 000 000 F CFA - ECO PUMP AFRIK
+`;
+          filename = `Journal_Ventes_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+          
+        case 'Journal des Achats':
+          csvData = `ECO PUMP AFRIK - JOURNAL DES ACHATS
+Date d'édition: ${new Date().toLocaleDateString('fr-FR')}
+Adresse: Cocody - Angré 7e Tranche
+
+═══════════════════════════════════════════════════════════════
+
+FOURNISSEURS ACTIFS:
+Nom,Contact,Devise,Conditions Paiement
+${fournisseurs.map(f => `"${f.nom}","${f.telephone || f.email || ''}","${f.devise}","${f.conditions_paiement || 'Standard'}"`).join('\n')}
+
+TOTAL FOURNISSEURS: ${fournisseurs.length}
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK - Tous droits réservés
+`;
+          filename = `Journal_Achats_${new Date().toISOString().split('T')[0]}.csv`;
           break;
           
         case 'Balance Clients':
-          reportData = `ECO PUMP AFRIK - BALANCE CLIENTS
-Date: ${new Date().toLocaleDateString('fr-FR')}
-
-${clients.map(c => {
+          const balanceClients = clients.map(c => {
             const clientFactures = factures.filter(f => f.client_id === c.client_id);
-            const totalDu = clientFactures.reduce((sum, f) => sum + (f.total_ttc - (f.montant_paye || 0)), 0);
-            return `${c.nom} | ${c.devise} | Dû: ${formatCurrency(totalDu, c.devise)}`;
-          }).join('\n')}
+            const totalFacture = clientFactures.reduce((sum, f) => sum + f.total_ttc, 0);
+            const totalPaye = clientFactures.reduce((sum, f) => sum + (f.montant_paye || 0), 0);
+            const solde = totalFacture - totalPaye;
+            return {
+              ...c,
+              totalFacture,
+              totalPaye,
+              solde,
+              nombreFactures: clientFactures.length
+            };
+          });
+          
+          csvData = `ECO PUMP AFRIK - BALANCE CLIENTS
+Date d'édition: ${new Date().toLocaleDateString('fr-FR')}
 
-Total Créances: ${formatCurrency(stats.montant_a_encaisser || 0)}`;
+═══════════════════════════════════════════════════════════════
+
+RÉSUMÉ:
+Total Clients: ${clients.length}
+Total Créances: ${formatCurrency(balanceClients.reduce((sum, c) => sum + c.solde, 0))}
+
+═══════════════════════════════════════════════════════════════
+
+DÉTAIL BALANCE CLIENTS:
+Client,Type,Devise,Nombre Factures,Total Facturé,Total Payé,Solde Restant,Email,Téléphone
+${balanceClients.map(c => `"${c.nom}","${c.type_client}","${c.devise}","${c.nombreFactures}","${c.totalFacture}","${c.totalPaye}","${c.solde}","${c.email || ''}","${c.telephone || ''}"`).join('\n')}
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK - Gestion Intelligente
+`;
+          filename = `Balance_Clients_${new Date().toISOString().split('T')[0]}.csv`;
+          break;
+          
+        case 'Balance Fournisseurs':
+          csvData = `ECO PUMP AFRIK - BALANCE FOURNISSEURS
+Date d'édition: ${new Date().toLocaleDateString('fr-FR')}
+
+═══════════════════════════════════════════════════════════════
+
+LISTE COMPLÈTE DES FOURNISSEURS:
+Nom,Numéro CC,Numéro RC,Email,Téléphone,Adresse,Devise,Conditions Paiement,Date Création
+${fournisseurs.map(f => `"${f.nom}","${f.numero_cc || ''}","${f.numero_rc || ''}","${f.email || ''}","${f.telephone || ''}","${f.adresse?.replace(/[\r\n]+/g, ' ') || ''}","${f.devise}","${f.conditions_paiement || ''}","${formatDate(f.created_at)}"`).join('\n')}
+
+TOTAL FOURNISSEURS: ${fournisseurs.length}
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK - Partenariats Durables
+`;
+          filename = `Balance_Fournisseurs_${new Date().toISOString().split('T')[0]}.csv`;
           break;
           
         case 'Suivi de Trésorerie':
-          reportData = `ECO PUMP AFRIK - SUIVI DE TRÉSORERIE
-Période: ${new Date().toLocaleDateString('fr-FR')}
+          csvData = `ECO PUMP AFRIK - SUIVI DE TRÉSORERIE
+Date d'édition: ${new Date().toLocaleDateString('fr-FR')}
 
-ENTRÉES:
-${paiements.map(p => `${formatDate(p.date_paiement)} | ${formatCurrency(p.montant, p.devise)} | ${p.mode_paiement}`).join('\n')}
+═══════════════════════════════════════════════════════════════
 
+ENTRÉES (PAIEMENTS REÇUS):
+Date,Montant,Devise,Mode Paiement,Référence,Document
+${paiements.map(p => `"${formatDate(p.date_paiement)}","${p.montant}","${p.devise}","${p.mode_paiement}","${p.reference_paiement || ''}","${p.type_document}"`).join('\n')}
+
+SORTIES À PRÉVOIR:
+Date,Description,Montant Estimé,Statut
+${factures.filter(f => f.statut_paiement !== 'payé').map(f => `"${formatDate(f.date_facture)}","À encaisser - ${f.client_nom}","${f.total_ttc - (f.montant_paye || 0)}","${f.statut_paiement}"`).join('\n')}
+
+═══════════════════════════════════════════════════════════════
+
+RÉSUMÉ TRÉSORERIE:
 Total Encaissé: ${formatCurrency(paiements.reduce((sum, p) => sum + p.montant, 0))}
-À Encaisser: ${formatCurrency(stats.montant_a_encaisser || 0)}`;
+À Encaisser: ${formatCurrency(stats.montant_a_encaisser || 0)}
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK - Gestion Financière
+`;
+          filename = `Suivi_Tresorerie_${new Date().toISOString().split('T')[0]}.csv`;
           break;
           
+        case 'Compte de Résultat':
         default:
-          reportData = `ECO PUMP AFRIK - ${reportType.toUpperCase()}
-Date: ${new Date().toLocaleDateString('fr-FR')}
+          const chiffreAffaires = factures.reduce((sum, f) => sum + f.total_ttc, 0);
+          const tvaCollectee = factures.reduce((sum, f) => sum + f.tva, 0);
+          
+          csvData = `ECO PUMP AFRIK - COMPTE DE RÉSULTAT
+Période: ${new Date().toLocaleDateString('fr-FR')}
 
-Rapport généré avec succès !
-Clients: ${stats.total_clients}
-Devis: ${stats.total_devis}
-Factures: ${stats.total_factures}`;
+═══════════════════════════════════════════════════════════════
+
+PRODUITS D'EXPLOITATION:
+Description,Montant
+"Chiffre d'Affaires (HT)","${chiffreAffaires - tvaCollectee}"
+"TVA Collectée","${tvaCollectee}"
+"Chiffre d'Affaires (TTC)","${chiffreAffaires}"
+
+INDICATEURS:
+Nombre de Clients: ${clients.length}
+Nombre de Devis: ${devis.length}
+Nombre de Factures: ${factures.length}
+Taux de Conversion: ${devis.length > 0 ? ((factures.length / devis.length) * 100).toFixed(1) : 0}%
+
+RÉPARTITION PAR DEVISE:
+FCFA: ${formatCurrency(factures.filter(f => f.devise === 'FCFA').reduce((sum, f) => sum + f.total_ttc, 0))}
+EUR: ${formatCurrency(factures.filter(f => f.devise === 'EUR').reduce((sum, f) => sum + f.total_ttc, 0), 'EUR')}
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK - Analyse Financière
+`;
+          filename = `Compte_Resultat_${new Date().toISOString().split('T')[0]}.csv`;
       }
       
-      // Create and download report
-      const blob = new Blob([reportData], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${reportType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // Create and download file
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      alert(`Rapport "${reportType}" généré et téléchargé avec succès !`);
+      alert(`✅ Rapport "${reportType}" généré et téléchargé avec succès !\n📊 Fichier Excel professionnel avec logo ECO PUMP AFRIK`);
     } catch (error) {
       console.error('Error generating report:', error);
-      alert(`Erreur lors de la génération du rapport: ${error.message}`);
+      alert(`❌ Erreur lors de la génération du rapport: ${error.message}`);
     } finally {
       setLoading(false);
     }
