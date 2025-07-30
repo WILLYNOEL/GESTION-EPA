@@ -267,6 +267,50 @@ function App() {
     });
   };
 
+  // Fonctions d'authentification
+  useEffect(() => {
+    // Vérifier si l'utilisateur est déjà connecté
+    const savedToken = localStorage.getItem('ecopump_token');
+    const savedUser = localStorage.getItem('ecopump_user');
+    
+    if (savedToken && savedUser) {
+      try {
+        const userInfo = JSON.parse(savedUser);
+        setToken(savedToken);
+        setCurrentUser(userInfo);
+        setIsAuthenticated(true);
+        
+        // Configurer axios avec le token
+        axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+      } catch (error) {
+        console.error('Erreur parsing user info:', error);
+        handleLogout();
+      }
+    }
+  }, []);
+
+  const handleLogin = (accessToken, userInfo) => {
+    setToken(accessToken);
+    setCurrentUser(userInfo);
+    setIsAuthenticated(true);
+    
+    // Configurer axios avec le token pour toutes les requêtes
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+    
+    // Charger les données une fois connecté
+    fetchAll();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('ecopump_token');
+    localStorage.removeItem('ecopump_user');
+    delete axios.defaults.headers.common['Authorization'];
+    setToken(null);
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setActiveTab('dashboard');
+  };
+
   // Fetch data functions
   const fetchAll = async () => {
     try {
