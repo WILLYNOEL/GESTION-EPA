@@ -2328,6 +2328,8 @@ async def update_user(user_id: str, user_data: dict, current_user: dict = Depend
             update_data["is_active"] = user_data["is_active"]
         if "password" in user_data and user_data["password"]:
             update_data["password"] = hash_password(user_data["password"])
+        if "permissions" in user_data:  # Nouveau : mise à jour des permissions
+            update_data["permissions"] = user_data["permissions"]
         
         if update_data:
             result = users_collection.update_one(
