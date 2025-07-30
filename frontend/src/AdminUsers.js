@@ -8,7 +8,9 @@ import { Label } from './components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { Badge } from './components/ui/badge';
 import { Alert, AlertDescription } from './components/ui/alert';
-import { Plus, Edit, Trash2, Users, Shield, User as UserIcon } from 'lucide-react';
+import { Checkbox } from './components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
+import { Plus, Edit, Trash2, Users, Shield, User as UserIcon, Settings, Key } from 'lucide-react';
 
 const AdminUsers = ({ token }) => {
   const [users, setUsers] = useState([]);
