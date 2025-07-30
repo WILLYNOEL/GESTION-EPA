@@ -3494,6 +3494,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
           {/* Modern Stock Movement Dialog */}
           <Dialog open={stockMovementDialog.open} onOpenChange={(open) => setStockMovementDialog({ ...stockMovementDialog, open })}>
