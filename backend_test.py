@@ -1117,6 +1117,10 @@ def main():
     print("\n" + "=" * 50)
     print("🚨 TESTING USER-REPORTED CORRECTIONS")
     print("=" * 50)
+    test_results.append(tester.test_missing_stock_endpoint())
+    test_results.append(tester.test_eco_pump_afrik_logo_improvements())
+    test_results.append(tester.test_pdf_layout_corrections())
+    test_results.append(tester.test_pdf_comments_field())
     test_results.append(tester.test_eco_pump_afrik_branding())
     test_results.append(tester.test_new_report_endpoints_specifically())
     
