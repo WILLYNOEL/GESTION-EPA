@@ -3771,6 +3771,139 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 </div>
               </CardContent>
             </Card>
+            
+            {/* New Section: Specialized Lists */}
+            <div className="mt-8">
+              <div className="flex items-center mb-6">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <div className="flex-shrink-0 px-4">
+                  <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                    📋 Listes Spécialisées par Période
+                  </h3>
+                </div>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+                {/* Liste Factures Impayées */}
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer border-red-200 bg-red-50">
+                  <CardHeader className="text-center">
+                    <AlertTriangle className="mx-auto h-12 w-12 text-red-600" />
+                    <CardTitle className="text-red-700">Factures Impayées</CardTitle>
+                    <CardDescription className="text-red-600">
+                      Liste des factures en attente de paiement avec retards
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="bg-red-100 p-3 rounded-lg text-sm">
+                        <div className="flex justify-between">
+                          <span>Factures impayées actuelles:</span>
+                          <span className="font-bold text-red-700">
+                            {factures.filter(f => f.statut_paiement !== 'payé').length}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Montant total:</span>
+                          <span className="font-bold text-red-700">
+                            {formatCurrency(
+                              factures
+                                .filter(f => f.statut_paiement !== 'payé')
+                                .reduce((sum, f) => sum + (f.total_ttc - (f.montant_paye || 0)), 0)
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full bg-red-600 hover:bg-red-700 text-white" 
+                        onClick={() => handleGenerateList('factures-impayees')}
+                        disabled={loading}
+                      >
+                        {loading ? '⏳ Génération...' : '📋 Générer la Liste'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Liste Toutes Factures */}
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200 bg-blue-50">
+                  <CardHeader className="text-center">
+                    <FileText className="mx-auto h-12 w-12 text-blue-600" />
+                    <CardTitle className="text-blue-700">Toutes les Factures</CardTitle>
+                    <CardDescription className="text-blue-600">
+                      Liste complète des factures avec statuts et montants
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="bg-blue-100 p-3 rounded-lg text-sm">
+                        <div className="flex justify-between">
+                          <span>Total factures:</span>
+                          <span className="font-bold text-blue-700">{factures.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Chiffre d'affaires:</span>
+                          <span className="font-bold text-blue-700">
+                            {formatCurrency(factures.reduce((sum, f) => sum + f.total_ttc, 0))}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                        onClick={() => handleGenerateList('factures')}
+                        disabled={loading}
+                      >
+                        {loading ? '⏳ Génération...' : '📋 Générer la Liste'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Liste Tous Devis */}
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer border-green-200 bg-green-50">
+                  <CardHeader className="text-center">
+                    <FileCheck className="mx-auto h-12 w-12 text-green-600" />
+                    <CardTitle className="text-green-700">Tous les Devis</CardTitle>
+                    <CardDescription className="text-green-600">
+                      Liste complète des devis avec taux de conversion
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="bg-green-100 p-3 rounded-lg text-sm">
+                        <div className="flex justify-between">
+                          <span>Total devis:</span>
+                          <span className="font-bold text-green-700">{devis.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Valeur totale:</span>
+                          <span className="font-bold text-green-700">
+                            {formatCurrency(devis.reduce((sum, d) => sum + d.total_ttc, 0))}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white" 
+                        onClick={() => handleGenerateList('devis')}
+                        disabled={loading}
+                      >
+                        {loading ? '⏳ Génération...' : '📋 Générer la Liste'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 text-yellow-600 mr-2" />
+                  <span className="text-sm text-yellow-800 font-medium">
+                    💡 Astuce: Utilisez les filtres de période ci-dessus pour générer des listes sur des dates spécifiques
+                  </span>
+                </div>
+              </div>
+            </div>
+
           </TabsContent>
         </Tabs>
       </div>
