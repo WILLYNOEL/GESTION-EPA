@@ -866,7 +866,12 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             title_style.fontSize = 20
             title_style.textColor = colors.HexColor('#333333')
             story.append(Paragraph(f"{doc_title} - {doc_number}", title_style))
-            story.append(Paragraph(f"Date: {doc_date}", styles['Normal']))
+            
+            # Date and time information
+            date_str = doc_date
+            current_time = datetime.now().strftime("%d/%m/%Y à %H:%M:%S")
+            story.append(Paragraph(f"Date: {date_str}", styles['Normal']))
+            story.append(Paragraph(f"Heure de génération: {current_time}", styles['Normal']))
             story.append(Spacer(1, 20))
             
             if doc_type in ["devis", "facture"]:
