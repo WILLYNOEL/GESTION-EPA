@@ -1848,6 +1848,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Card>
             </div>
           </TabsContent>
+          )}
 
           {/* Clients Tab */}
           <TabsContent value="clients" className="space-y-6">
