@@ -2954,103 +2954,154 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Dialog>
             </div>
 
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Numéro</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Statut Paiement</TableHead>
-                      <TableHead>Montant Payé</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {factures.length === 0 ? (
+            {/* Interface de Recherche Intelligente pour Factures */}
+            <Card>  
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="mr-2 h-5 w-5" />
+                  Recherche de Factures Intelligente
+                </CardTitle>
+                <CardDescription>
+                  Recherchez par numéro de facture ou nom de client
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Tapez le numéro de facture ou nom du client..."
+                    value={facturesSearch}
+                    onChange={(e) => setFacturesSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleFacturesSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setFacturesSearch('');
+                      setShowFacturesData(true);
+                    }}
+                  >
+                    Voir Tout ({factures.length})
+                  </Button>
+                  {showFacturesData && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowFacturesData(false)}
+                    >
+                      Masquer Tout
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Affichage des Résultats Factures */}
+            {showFacturesData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Résultats ({getFilteredFactures().length} facture{getFilteredFactures().length > 1 ? 's' : ''})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          <Receipt className="mx-auto h-12 w-12 mb-2" />
-                          <p>Aucune facture émise</p>
-                          <p className="text-sm">Créez votre première facture ou convertissez un devis</p>
-                        </TableCell>
+                        <TableHead>Numéro</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Statut Paiement</TableHead>
+                        <TableHead>Montant Payé</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      factures.map((f) => (
-                        <TableRow key={f.facture_id}>
-                          <TableCell className="font-medium">{f.numero_facture}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p>{f.client_nom}</p>
-                              {f.reference_commande && (
-                                <p className="text-xs text-muted-foreground">Ref: {f.reference_commande}</p>
-                              )}
-                            </div>
+                    </TableHeader>
+                    <TableBody>
+                      {getFilteredFactures().length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            <Receipt className="mx-auto h-12 w-12 mb-2" />
+                            <p>Aucune facture trouvée</p>
+                            <p className="text-sm">Essayez une recherche différente</p>
                           </TableCell>
-                          <TableCell>{formatDate(f.date_facture)}</TableCell>
-                          <TableCell className="font-medium">{formatCurrency(f.total_ttc, f.devise)}</TableCell>
-                          <TableCell>
-                            <Badge variant={getStatutBadge(f.statut_paiement)}>{f.statut_paiement}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{formatCurrency(f.montant_paye || 0, f.devise)}</p>
-                              {f.statut_paiement === 'partiel' && (
-                                <p className="text-xs text-orange-600">
-                                  Reste: {formatCurrency((f.total_ttc - (f.montant_paye || 0)), f.devise)}
-                                </p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleViewDocument('facture', f.facture_id)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {f.statut_paiement !== 'payé' && (
+                        </TableRow>
+                      ) : (
+                        getFilteredFactures().map((f) => (
+                          <TableRow key={f.facture_id}>
+                            <TableCell className="font-medium">{f.numero_facture}</TableCell>
+                            <TableCell>
+                              <div>
+                                <p>{f.client_nom}</p>
+                                {f.reference_commande && (
+                                  <p className="text-xs text-muted-foreground">Ref: {f.reference_commande}</p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{formatDate(f.date_facture)}</TableCell>
+                            <TableCell className="font-medium">{formatCurrency(f.total_ttc, f.devise)}</TableCell>
+                            <TableCell>
+                              <Badge variant={getStatutBadge(f.statut_paiement)}>{f.statut_paiement}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{formatCurrency(f.montant_paye || 0, f.devise)}</p>
+                                {f.statut_paiement === 'partiel' && (
+                                  <p className="text-xs text-orange-600">
+                                    Reste: {formatCurrency((f.total_ttc - (f.montant_paye || 0)), f.devise)}
+                                  </p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
                                 <Button 
                                   size="sm" 
                                   variant="outline"
-                                  onClick={() => {
-                                    // Reset form first, then set values
-                                    setPaiementForm({
-                                      type_document: 'facture',
-                                      document_id: f.facture_id,
-                                      client_id: f.client_id,
-                                      montant: f.total_ttc - (f.montant_paye || 0),
-                                      devise: f.devise,
-                                      mode_paiement: 'espèce',
-                                      reference_paiement: ''
-                                    });
-                                    setIsPaiementDialogOpen(true);
-                                  }}
+                                  onClick={() => handleViewDocument('facture', f.facture_id)}
                                 >
-                                  <CreditCard className="h-4 w-4 mr-1" />
-                                  Paiement
+                                  <Eye className="h-4 w-4" />
                                 </Button>
-                              )}
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleDownloadDocument('facture', f.facture_id)}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                                {f.statut_paiement !== 'payé' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      setPaiementForm({
+                                        facture_id: f.facture_id,
+                                        client_id: f.client_id,
+                                        devise: f.devise,
+                                        montant: f.total_ttc - (f.montant_paye || 0),
+                                        mode_paiement: '',
+                                        date_paiement: new Date().toISOString().split('T')[0],
+                                        numero_transaction: '',
+                                        commentaires: ''
+                                      });
+                                      setIsPaiementDialogOpen(true);
+                                    }}
+                                  >
+                                    <CreditCard className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleDownloadDocument('facture', f.facture_id)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Stock Tab - Complete Implementation */}
