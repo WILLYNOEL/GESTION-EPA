@@ -1443,37 +1443,64 @@ ECO PUMP AFRIK - Tous droits réservés`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Professional Header */}
-      <header className="bg-white shadow-lg border-b-4 border-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                <Package className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">ECO PUMP AFRIK</h1>
-                <p className="text-sm text-blue-600 font-medium">Solutions Hydrauliques Professionnelles</p>
+    <>
+      {!isAuthenticated ? (
+        <Login onLogin={handleLogin} />
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+          {/* Professional Header */}
+          <header className="bg-white shadow-lg border-b-4 border-blue-600">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center py-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                    <Package className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">ECO PUMP AFRIK</h1>
+                    <p className="text-sm text-blue-600 font-medium">Solutions Hydrauliques Professionnelles</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4" />
+                      <span>{clients.length} clients</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4" />
+                      <span>{factures.length} factures</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Package className="h-4 w-4" />
+                      <span>{stock.length} articles</span>
+                    </div>
+                  </div>
+                  
+                  {/* User Info & Logout */}
+                  <div className="flex items-center space-x-4 border-l border-gray-300 pl-6">
+                    <div className="flex items-center space-x-2">
+                      {currentUser?.role === 'admin' ? (
+                        <Shield className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <Users className="h-4 w-4 text-gray-500" />
+                      )}
+                      <span className="text-sm font-medium text-gray-700">
+                        {currentUser?.username}
+                      </span>
+                      <Badge variant={currentUser?.role === 'admin' ? 'default' : 'secondary'}>
+                        {currentUser?.role === 'admin' ? 'Admin' : 'User'}
+                      </Badge>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Déconnexion
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4" />
-                <span>{clients.length} clients</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4" />
-                <span>{factures.length} factures</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Package className="h-4 w-4" />
-                <span>{stock.length} articles</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
