@@ -195,10 +195,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Specialized list generation - Factures impayées"
-    - "Specialized list generation - Toutes factures et devis"
-    - "Validation filtres période pour listes spécialisées"
-    - "Test intégration frontend/backend listes PDF"
+    - "Frontend integration testing for specialized lists"
+    - "End-to-end validation of list generation workflow"
+    - "User interface testing for new cards and filters"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
