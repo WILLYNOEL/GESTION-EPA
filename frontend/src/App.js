@@ -507,8 +507,14 @@ function App() {
         case 'Journal des Ventes':
           backendReportType = 'journal_ventes';
           break;
+        case 'Journal des Achats':
+          backendReportType = 'journal_achats';
+          break;
         case 'Balance Clients':
           backendReportType = 'balance_clients';
+          break;
+        case 'Balance Fournisseurs':
+          backendReportType = 'balance_fournisseurs';
           break;
         case 'Suivi de Trésorerie':
           backendReportType = 'tresorerie';
