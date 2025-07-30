@@ -432,10 +432,18 @@ class EcoPumpAfrikAPITester:
         return True
 
     def test_pdf_report_generation(self):
-        """Test PDF generation for reports"""
-        print("\n🔍 Testing PDF Report Generation...")
+        """Test PDF generation for reports - INCLUDING NEW CORRECTIONS"""
+        print("\n🔍 Testing PDF Report Generation - ALL 6 REPORT TYPES...")
         
-        report_types = ["journal_ventes", "balance_clients", "tresorerie", "compte_resultat"]
+        # Test ALL 6 report types including the newly added ones
+        report_types = [
+            "journal_ventes", 
+            "balance_clients", 
+            "journal_achats",      # NEW - Added per user feedback
+            "balance_fournisseurs", # NEW - Added per user feedback
+            "tresorerie", 
+            "compte_resultat"
+        ]
         
         for report_type in report_types:
             success, response = self.run_test(
@@ -446,7 +454,10 @@ class EcoPumpAfrikAPITester:
                 expect_pdf=True
             )
             if not success:
+                print(f"❌ CRITICAL: {report_type} report failed - this was supposed to be fixed!")
                 return False
+            else:
+                print(f"✅ VERIFIED: {report_type} report generates PDF successfully")
         
         # Test invalid report type
         success, response = self.run_test(
