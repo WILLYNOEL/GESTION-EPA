@@ -2123,6 +2123,229 @@ async def search_documents(q: str):
         logger.error(f"Error searching: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ========================================
+# ENDPOINTS D'AUTHENTIFICATION
+# ========================================
+
+@app.post("/api/auth/login", response_model=Token)
+async def login(user_credentials: UserLogin):
+    """Authentification utilisateur"""
+    try:
+        # Vérifier les identifiants
+        user = users_collection.find_one({"username": user_credentials.username})
+        
+        if not user or not verify_password(user_credentials.password, user["password"]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Nom d'utilisateur ou mot de passe incorrect",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        if not user.get("is_active", False):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Compte utilisateur désactivé",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Mettre à jour la dernière connexion
+        users_collection.update_one(
+            {"user_id": user["user_id"]},
+            {"$set": {"last_login": datetime.now().isoformat()}}
+        )
+        
+        # Créer le token JWT
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user["username"]}, expires_delta=access_token_expires
+        )
+        
+        # Informations utilisateur (sans mot de passe)
+        user_info = {
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "email": user.get("email"),
+            "role": user["role"],
+            "last_login": user.get("last_login")
+        }
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_info": user_info
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during login: {e}")
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+
+@app.get("/api/auth/me")
+async def get_current_user(current_user: dict = Depends(verify_token)):
+    """Obtenir les informations de l'utilisateur actuel"""
+    return {
+        "user_id": current_user["user_id"],
+        "username": current_user["username"],
+        "email": current_user.get("email"),
+        "role": current_user["role"],
+        "is_active": current_user["is_active"],
+        "last_login": current_user.get("last_login")
+    }
+
+@app.post("/api/auth/users")
+async def create_user(user_data: UserCreate, current_user: dict = Depends(verify_token)):
+    """Créer un nouvel utilisateur (admin uniquement)"""
+    try:
+        # Vérifier que l'utilisateur actuel est admin
+        if current_user["role"] != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seuls les administrateurs peuvent créer des utilisateurs"
+            )
+        
+        # Vérifier que le nom d'utilisateur n'existe pas déjà
+        existing_user = users_collection.find_one({"username": user_data.username})
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ce nom d'utilisateur existe déjà"
+            )
+        
+        # Créer l'utilisateur
+        user_id = str(uuid.uuid4())
+        hashed_password = hash_password(user_data.password)
+        
+        new_user = {
+            "user_id": user_id,
+            "username": user_data.username,
+            "password": hashed_password,
+            "email": user_data.email,
+            "role": user_data.role,
+            "is_active": True,
+            "created_at": datetime.now().isoformat(),
+            "last_login": None
+        }
+        
+        users_collection.insert_one(new_user)
+        
+        # Retourner les infos utilisateur (sans mot de passe)
+        return {
+            "user_id": user_id,
+            "username": user_data.username,
+            "email": user_data.email,
+            "role": user_data.role,
+            "is_active": True,
+            "created_at": new_user["created_at"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating user: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la création de l'utilisateur")
+
+@app.get("/api/auth/users")
+async def list_users(current_user: dict = Depends(verify_token)):
+    """Lister tous les utilisateurs (admin uniquement)"""
+    try:
+        # Vérifier que l'utilisateur actuel est admin
+        if current_user["role"] != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seuls les administrateurs peuvent voir la liste des utilisateurs"
+            )
+        
+        # Récupérer tous les utilisateurs (sans les mots de passe)
+        users = list(users_collection.find({}, {"password": 0}))
+        
+        for user in users:
+            user["_id"] = str(user["_id"])
+        
+        return {"users": users}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error listing users: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la récupération des utilisateurs")
+
+@app.put("/api/auth/users/{user_id}")
+async def update_user(user_id: str, user_data: dict, current_user: dict = Depends(verify_token)):
+    """Mettre à jour un utilisateur (admin uniquement)"""
+    try:
+        # Vérifier que l'utilisateur actuel est admin
+        if current_user["role"] != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seuls les administrateurs peuvent modifier des utilisateurs"
+            )
+        
+        # Préparer les données de mise à jour
+        update_data = {}
+        if "email" in user_data:
+            update_data["email"] = user_data["email"]
+        if "role" in user_data:
+            update_data["role"] = user_data["role"]
+        if "is_active" in user_data:
+            update_data["is_active"] = user_data["is_active"]
+        if "password" in user_data and user_data["password"]:
+            update_data["password"] = hash_password(user_data["password"])
+        
+        if update_data:
+            result = users_collection.update_one(
+                {"user_id": user_id},
+                {"$set": update_data}
+            )
+            
+            if result.matched_count == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Utilisateur introuvable"
+                )
+        
+        return {"message": "Utilisateur mis à jour avec succès"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating user: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour de l'utilisateur")
+
+@app.delete("/api/auth/users/{user_id}")
+async def delete_user(user_id: str, current_user: dict = Depends(verify_token)):
+    """Supprimer un utilisateur (admin uniquement)"""
+    try:
+        # Vérifier que l'utilisateur actuel est admin
+        if current_user["role"] != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seuls les administrateurs peuvent supprimer des utilisateurs"
+            )
+        
+        # Empêcher la suppression de son propre compte
+        if current_user["user_id"] == user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Vous ne pouvez pas supprimer votre propre compte"
+            )
+        
+        result = users_collection.delete_one({"user_id": user_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Utilisateur introuvable"
+            )
+        
+        return {"message": "Utilisateur supprimé avec succès"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting user: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la suppression de l'utilisateur")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
