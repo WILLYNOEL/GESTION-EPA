@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import os
 import uuid
 from pymongo import MongoClient
@@ -19,6 +20,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib import colors
 import base64
 import io
+import hashlib
+import jwt
+import secrets
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
