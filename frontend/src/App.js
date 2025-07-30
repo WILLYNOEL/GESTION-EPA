@@ -2035,11 +2035,11 @@ function App() {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">États Financiers & Rapports</h2>
               <div className="flex space-x-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleExportPDF}>
                   <Download className="mr-2 h-4 w-4" />
                   Export PDF
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleExportExcel}>
                   <Download className="mr-2 h-4 w-4" />
                   Export Excel
                 </Button>
