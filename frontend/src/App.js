@@ -273,8 +273,8 @@ function App() {
             <div class="document">
               <div class="header">
                 <div class="logo">
-                  <div style="font-size: 28px; color: #0066cc;">🏭 ECO PUMP AFRIK</div>
-                  <div style="font-size: 14px; color: #666;">Gestion Intelligente</div>
+                  <div style="font-size: 32px; color: #0066cc; font-weight: bold;">ECO PUMP AFRIK</div>
+                  <div style="font-size: 16px; color: #666; margin-top: 5px;">Gestion Intelligente</div>
                 </div>
                 <div class="company-info">
                   <div><strong>ECO PUMP AFRIK</strong></div>
