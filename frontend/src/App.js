@@ -30,6 +30,9 @@ function App() {
   const [paiements, setPaiements] = useState([]);
   const [stats, setStats] = useState({});
   const [alerts, setAlerts] = useState([]);
+  // Loading states
+  const [loading, setLoading] = useState(false);
+  
   // Rapport filters state
   const [rapportFilters, setRapportFilters] = useState({
     date_debut: '',
