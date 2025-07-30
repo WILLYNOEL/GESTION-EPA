@@ -2646,29 +2646,44 @@ ECO PUMP AFRIK - Tous droits réservés`;
 
           {/* Global Payment Dialog - Can be triggered from any tab */}
           <Dialog open={isPaiementDialogOpen} onOpenChange={setIsPaiementDialogOpen}>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Enregistrer un Paiement</DialogTitle>
-                <DialogDescription>
-                  Enregistrer un paiement reçu d'un client.
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader className="border-b pb-4">
+                <DialogTitle className="text-xl font-bold text-blue-600">💳 Enregistrer un Paiement</DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  Enregistrer un paiement reçu d'un client pour une facture.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handlePaiementSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="global_paiement_type">Type de document *</Label>
-                  <Select value={paiementForm.type_document} onValueChange={(value) => setPaiementForm({ ...paiementForm, type_document: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="facture">Facture</SelectItem>
-                      <SelectItem value="achat">Bon de commande</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <form onSubmit={handlePaiementSubmit} className="space-y-6 pt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="global_paiement_type" className="text-sm font-medium">Type de document *</Label>
+                    <Select value={paiementForm.type_document} onValueChange={(value) => setPaiementForm({ ...paiementForm, type_document: value })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="facture">💰 Facture</SelectItem>
+                        <SelectItem value="achat">📋 Bon de commande</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="global_paiement_devise" className="text-sm font-medium">Devise *</Label>
+                    <Select value={paiementForm.devise} onValueChange={(value) => setPaiementForm({ ...paiementForm, devise: value })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FCFA">🇨🇮 FCFA</SelectItem>
+                        <SelectItem value="EUR">🇪🇺 EUR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="global_paiement_document">Document *</Label>
+                  <Label htmlFor="global_paiement_document" className="text-sm font-medium">Document à payer *</Label>
                   <Select value={paiementForm.document_id} onValueChange={(value) => {
                     setPaiementForm({ ...paiementForm, document_id: value });
                     if (paiementForm.type_document === 'facture') {
@@ -2684,14 +2699,18 @@ ECO PUMP AFRIK - Tous droits réservés`;
                       }
                     }
                   }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un document" />
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionner un document à payer" />
                     </SelectTrigger>
                     <SelectContent>
                       {paiementForm.type_document === 'facture' ? (
                         factures.filter(f => f.statut_paiement !== 'payé').map((facture) => (
                           <SelectItem key={facture.facture_id} value={facture.facture_id}>
-                            {facture.numero_facture} - {facture.client_nom} - {formatCurrency(facture.total_ttc - (facture.montant_paye || 0), facture.devise)}
+                            <div className="flex justify-between w-full">
+                              <span className="font-mono text-sm">{facture.numero_facture}</span>
+                              <span className="text-gray-600">{facture.client_nom}</span>
+                              <span className="font-bold text-red-600">{formatCurrency(facture.total_ttc - (facture.montant_paye || 0), facture.devise)}</span>
+                            </div>
                           </SelectItem>
                         ))
                       ) : (
@@ -2703,62 +2722,58 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="global_paiement_montant">Montant *</Label>
-                    <Input
-                      id="global_paiement_montant"
-                      required
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={paiementForm.montant}
-                      onChange={(e) => setPaiementForm({ ...paiementForm, montant: parseFloat(e.target.value) || 0 })}
-                    />
+                    <Label htmlFor="global_paiement_montant" className="text-sm font-medium">Montant reçu *</Label>
+                    <div className="mt-1 relative">
+                      <Input
+                        id="global_paiement_montant"
+                        required
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="pl-8"
+                        value={paiementForm.montant}
+                        onChange={(e) => setPaiementForm({ ...paiementForm, montant: parseFloat(e.target.value) || 0 })}
+                      />
+                      <span className="absolute left-2 top-2 text-gray-500">💰</span>
+                    </div>
                   </div>
+                  
                   <div>
-                    <Label htmlFor="global_paiement_devise">Devise</Label>
-                    <Select value={paiementForm.devise} onValueChange={(value) => setPaiementForm({ ...paiementForm, devise: value })}>
-                      <SelectTrigger>
+                    <Label htmlFor="global_paiement_mode" className="text-sm font-medium">Mode de paiement *</Label>
+                    <Select value={paiementForm.mode_paiement} onValueChange={(value) => setPaiementForm({ ...paiementForm, mode_paiement: value })}>
+                      <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="FCFA">FCFA</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="espèce">💵 Espèce</SelectItem>
+                        <SelectItem value="virement">🏦 Virement bancaire</SelectItem>
+                        <SelectItem value="mobile_money">📱 Mobile Money</SelectItem>
+                        <SelectItem value="chèque">📝 Chèque</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="global_paiement_mode">Mode de paiement *</Label>
-                  <Select value={paiementForm.mode_paiement} onValueChange={(value) => setPaiementForm({ ...paiementForm, mode_paiement: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="espèce">Espèce</SelectItem>
-                      <SelectItem value="virement">Virement bancaire</SelectItem>
-                      <SelectItem value="mobile_money">Mobile Money</SelectItem>
-                      <SelectItem value="chèque">Chèque</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="global_paiement_reference" className="text-sm font-medium">Référence paiement</Label>
+                  <div className="mt-1 relative">
+                    <Input
+                      id="global_paiement_reference"
+                      className="pl-8"
+                      value={paiementForm.reference_paiement}
+                      onChange={(e) => setPaiementForm({ ...paiementForm, reference_paiement: e.target.value })}
+                      placeholder="Ex: VIR20250730001, CHQ123456"
+                    />
+                    <span className="absolute left-2 top-2 text-gray-500">🔗</span>
+                  </div>
                 </div>
                 
-                <div>
-                  <Label htmlFor="global_paiement_reference">Référence paiement</Label>
-                  <Input
-                    id="global_paiement_reference"
-                    value={paiementForm.reference_paiement}
-                    onChange={(e) => setPaiementForm({ ...paiementForm, reference_paiement: e.target.value })}
-                    placeholder="Ex: VIR20250730001, CHQ123456"
-                  />
-                </div>
-                
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsPaiementDialogOpen(false)}>
-                    Annuler
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button type="button" variant="outline" onClick={() => setIsPaiementDialogOpen(false)} className="px-6">
+                    ❌ Annuler
                   </Button>
-                  <Button type="submit" disabled={loading}>
-                    {loading ? 'Enregistrement...' : 'Enregistrer'}
+                  <Button type="submit" disabled={loading} className="px-6 bg-blue-600 hover:bg-blue-700">
+                    {loading ? '⏳ Enregistrement...' : '✅ Enregistrer le Paiement'}
                   </Button>
                 </div>
               </form>
