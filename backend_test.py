@@ -689,6 +689,15 @@ def main():
     test_results.append(tester.test_get_paiements())
     test_results.append(tester.test_search_functionality())
     
+    # NEW PDF ENDPOINT TESTS - Critical for ECO PUMP AFRIK
+    print("\n" + "=" * 50)
+    print("🔥 TESTING NEW PDF ENDPOINTS - ECO PUMP AFRIK")
+    print("=" * 50)
+    test_results.append(tester.test_pdf_document_generation())
+    test_results.append(tester.test_pdf_report_generation())
+    test_results.append(tester.test_pdf_content_headers())
+    test_results.append(tester.test_pdf_with_real_data())
+    
     # Print final results
     print("\n" + "=" * 50)
     print(f"📊 FINAL RESULTS")
