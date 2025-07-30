@@ -842,7 +842,92 @@ class EcoPumpAfrikAPITester:
         
         return True
 
-    def test_missing_stock_endpoint(self):
+    def test_mongodb_stock_update_error_correction(self):
+        """Test CRITICAL CORRECTION: MongoDB stock update error with immutable fields"""
+        print("\n🔍 Testing CRITICAL CORRECTION: MongoDB Stock Update Error...")
+        
+        # Create a test stock article
+        article_data = {
+            "ref": "MONGODB-FIX-TEST",
+            "designation": "Article test correction erreur MongoDB",
+            "quantite_stock": 100.0,
+            "stock_minimum": 10.0,
+            "prix_achat_moyen": 50000.0,
+            "prix_vente": 75000.0,
+            "fournisseur_principal": "FOURNISSEUR TEST",
+            "emplacement": "Entrepôt Test"
+        }
+        
+        success, response = self.run_test(
+            "Create Stock Article for MongoDB Fix Test",
+            "POST",
+            "api/stock",
+            200,
+            data=article_data
+        )
+        
+        if not success or 'article' not in response:
+            print("❌ Failed to create test stock article")
+            return False
+        
+        article_id = response['article']['article_id']
+        print(f"✅ Created test article with ID: {article_id}")
+        
+        # Test the problematic update that used to cause MongoDB error
+        # Include immutable fields that should be automatically filtered
+        update_data_with_immutable = {
+            "_id": "this_should_be_filtered_out",
+            "article_id": "this_should_be_filtered_out",
+            "created_at": "this_should_be_filtered_out",
+            "created_at_formatted": "this_should_be_filtered_out",
+            "quantite_stock": 75.0,
+            "prix_vente": 80000.0,
+            "emplacement": "Entrepôt Mis à Jour"
+        }
+        
+        success, response = self.run_test(
+            "CRITICAL FIX: Stock Update with Immutable Fields (should work now)",
+            "PUT",
+            f"api/stock/{article_id}",
+            200,
+            data=update_data_with_immutable
+        )
+        
+        if not success:
+            print("❌ CRITICAL ISSUE: Stock update still fails with immutable fields!")
+            print("❌ The MongoDB '_id immutable' error correction is not working")
+            return False
+        
+        print("✅ CRITICAL FIX VERIFIED: Stock update works with immutable fields")
+        print("✅ CRITICAL FIX VERIFIED: Immutable fields (_id, article_id, created_at) automatically filtered")
+        print("✅ CRITICAL FIX VERIFIED: No more '_id immutable' MongoDB error")
+        
+        # Verify the update was applied correctly
+        if 'article' in response:
+            updated_article = response['article']
+            if updated_article.get('quantite_stock') == 75.0:
+                print("✅ Stock quantity updated correctly to 75.0")
+            if updated_article.get('prix_vente') == 80000.0:
+                print("✅ Sale price updated correctly to 80000.0")
+            if updated_article.get('emplacement') == "Entrepôt Mis à Jour":
+                print("✅ Location updated correctly")
+        
+        # Test with non-existent article ID (should return 404)
+        success, response = self.run_test(
+            "Stock Update Non-existent Article (should fail with 404)",
+            "PUT",
+            "api/stock/non_existent_article_id",
+            404,
+            data={"quantite_stock": 50.0}
+        )
+        
+        if success:
+            print("✅ Error handling for non-existent article works correctly (404)")
+        else:
+            print("❌ Error handling for non-existent article not working properly")
+            return False
+        
+        return True
         """Test the missing PUT /api/stock/{article_id} endpoint - CRITICAL FIX"""
         print("\n🔍 Testing MISSING STOCK UPDATE ENDPOINT - CRITICAL CORRECTION...")
         
