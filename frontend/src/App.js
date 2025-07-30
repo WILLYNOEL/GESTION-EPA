@@ -325,7 +325,12 @@ function App() {
     setActiveTab('dashboard');
   };
 
-  // Fetch data functions
+  // Fonction pour vérifier si l'utilisateur a accès à un onglet
+  const hasPermission = (tabName) => {
+    if (!currentUser || !currentUser.permissions) return false;
+    if (currentUser.role === 'admin') return true; // Les admins ont accès à tout
+    return currentUser.permissions[tabName] === true;
+  };
   const fetchAll = async () => {
     try {
       const [
