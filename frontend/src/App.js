@@ -2143,11 +2143,27 @@ ECO PUMP AFRIK - Tous droits réservés`;
                       </div>
                       <div>
                         <Label htmlFor="facture_livraison">Mode de livraison</Label>
-                        <Input
-                          id="facture_livraison"
-                          value={factureForm.mode_livraison}
-                          onChange={(e) => setFactureForm({ ...factureForm, mode_livraison: e.target.value })}
-                          placeholder="Ex: Franco domicile"
+                        <Select value={factureForm.mode_livraison} onValueChange={(value) => setFactureForm({ ...factureForm, mode_livraison: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner le mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ex-works">Ex-Works (départ usine)</SelectItem>
+                            <SelectItem value="livraison-incluse">Livraison incluse</SelectItem>
+                            <SelectItem value="franco-domicile">Franco domicile</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="col-span-2">
+                        <Label htmlFor="facture_commentaires">Commentaires/Notes</Label>
+                        <textarea
+                          id="facture_commentaires"
+                          className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
+                          rows="3"
+                          value={factureForm.commentaires || ''}
+                          onChange={(e) => setFactureForm({ ...factureForm, commentaires: e.target.value })}
+                          placeholder="Informations complémentaires, instructions spéciales, notes internes..."
                         />
                       </div>
                     </div>
