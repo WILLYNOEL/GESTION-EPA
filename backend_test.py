@@ -1953,6 +1953,18 @@ def main():
     test_results.append(tester.test_pdf_content_headers())
     test_results.append(tester.test_pdf_with_real_data())
     
+    # 🎯 NEW SPECIALIZED LIST GENERATION TESTS - HIGHEST PRIORITY
+    print("\n" + "=" * 70)
+    print("🎯 TESTING NEW SPECIALIZED LIST GENERATION - ECO PUMP AFRIK")
+    print("=" * 70)
+    print("PRIORITY ENDPOINTS VALIDATION:")
+    print("- GET /api/pdf/liste/factures-impayees")
+    print("- GET /api/pdf/liste/factures")
+    print("- GET /api/pdf/liste/devis")
+    print("=" * 70)
+    test_results.append(tester.test_specialized_list_generation_endpoints())
+    test_results.append(tester.test_specialized_lists_branding_validation())
+    
     # 🚨 CRITICAL USER REPORTED CORRECTIONS - HIGHEST PRIORITY
     print("\n" + "=" * 70)
     print("🚨 TESTING USER REPORTED CORRECTIONS - ECO PUMP AFRIK")
