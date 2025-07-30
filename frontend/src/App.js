@@ -41,6 +41,41 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState({});
   
+  // Filter states for each tab
+  const [devisFilters, setDevisFilters] = useState({
+    client_nom: '',
+    numero_devis: '',
+    date_debut: '',
+    date_fin: '',
+    devise: '',
+    statut: ''
+  });
+  
+  const [facturesFilters, setFacturesFilters] = useState({
+    client_nom: '',
+    numero_facture: '',
+    date_debut: '',
+    date_fin: '',
+    statut_paiement: '',
+    devise: '',
+    montant_min: '',
+    montant_max: ''
+  });
+  
+  const [clientsFilters, setClientsFilters] = useState({
+    nom: '',
+    type_client: '',
+    devise: '',
+    ville: ''
+  });
+  
+  const [stockFilters, setStockFilters] = useState({
+    designation: '',
+    ref: '',
+    stock_bas: false,
+    fournisseur: ''
+  });
+  
   // Client form state
   const [clientForm, setClientForm] = useState({
     nom: '',
