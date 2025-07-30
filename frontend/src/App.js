@@ -3033,6 +3033,52 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 </Button>
               </div>
             </div>
+            
+            {/* Date filters for reports */}
+            <Card className="bg-blue-50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Filtres de Période
+                </CardTitle>
+                <CardDescription>
+                  Sélectionnez une période pour filtrer les rapports (optionnel)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="date_debut">Date de début</Label>
+                    <Input
+                      id="date_debut"
+                      type="date"
+                      value={rapportFilters.date_debut}
+                      onChange={(e) => setRapportFilters({ ...rapportFilters, date_debut: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="date_fin">Date de fin</Label>
+                    <Input
+                      id="date_fin"
+                      type="date"
+                      value={rapportFilters.date_fin}
+                      onChange={(e) => setRapportFilters({ ...rapportFilters, date_fin: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setRapportFilters({ date_debut: '', date_fin: '' })}
+                  >
+                    🗑️ Effacer les filtres
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
