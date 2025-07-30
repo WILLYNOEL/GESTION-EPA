@@ -955,11 +955,7 @@ function App() {
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              onClick={() => {
-                                if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
-                                  // handleDeleteClient(client.client_id);
-                                }
-                              }}
+                              onClick={() => handleDeleteClient(client.client_id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
