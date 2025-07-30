@@ -2922,6 +2922,154 @@ ECO PUMP AFRIK - Tous droits réservés`;
             </Card>
           </TabsContent>
 
+          {/* Modern Stock Movement Dialog */}
+          <Dialog open={stockMovementDialog.open} onOpenChange={(open) => setStockMovementDialog({ ...stockMovementDialog, open })}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader className="border-b pb-4">
+                <DialogTitle className="text-xl font-bold text-green-600">📦 Mouvement de Stock</DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  {stockMovementDialog.article?.designation} - Gestion des entrées et sorties
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleStockMovementSubmit} className="space-y-6 pt-4">
+                {stockMovementDialog.article && (
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="font-medium text-blue-800 mb-2">📋 Informations actuelles</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Stock actuel:</span>
+                        <span className="ml-2 font-bold text-blue-600">{stockMovementDialog.article.quantite_stock}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Stock minimum:</span>
+                        <span className="ml-2 font-bold text-orange-600">{stockMovementDialog.article.stock_minimum}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Référence:</span>
+                        <span className="ml-2 font-mono text-gray-800">{stockMovementDialog.article.ref}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Emplacement:</span>
+                        <span className="ml-2 text-gray-800">{stockMovementDialog.article.emplacement || 'Non défini'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="movement_type" className="text-sm font-medium">Type d'opération *</Label>
+                    <Select 
+                      value={stockMovementDialog.type} 
+                      onValueChange={(value) => setStockMovementDialog({ ...stockMovementDialog, type: value })}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="in">📥 Entrée (Réception)</SelectItem>
+                        <SelectItem value="out">📤 Sortie (Vente/Consommation)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="movement_quantity" className="text-sm font-medium">Quantité *</Label>
+                    <Input
+                      id="movement_quantity"
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={stockMovementDialog.movement}
+                      onChange={(e) => setStockMovementDialog({ ...stockMovementDialog, movement: e.target.value })}
+                      placeholder="Quantité à déplacer"
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="movement_reason" className="text-sm font-medium">Motif/Commentaire</Label>
+                  <Select 
+                    value={stockMovementDialog.reason} 
+                    onValueChange={(value) => setStockMovementDialog({ ...stockMovementDialog, reason: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Sélectionner un motif..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stockMovementDialog.type === 'in' ? (
+                        <>
+                          <SelectItem value="reception_fournisseur">📦 Réception fournisseur</SelectItem>
+                          <SelectItem value="retour_client">🔄 Retour client</SelectItem>
+                          <SelectItem value="correction_inventaire">📊 Correction inventaire</SelectItem>
+                          <SelectItem value="transfert_entrant">⬅️ Transfert entrant</SelectItem>
+                          <SelectItem value="autre_entree">➕ Autre entrée</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="vente_client">💰 Vente client</SelectItem>
+                          <SelectItem value="consommation_interne">🔧 Consommation interne</SelectItem>
+                          <SelectItem value="perte_casse">❌ Perte/Casse</SelectItem>
+                          <SelectItem value="transfert_sortant">➡️ Transfert sortant</SelectItem>
+                          <SelectItem value="autre_sortie">➖ Autre sortie</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {stockMovementDialog.article && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-800 mb-2">🧮 Simulation</h4>
+                    <div className="text-sm">
+                      <span className="text-gray-600">Nouveau stock après opération: </span>
+                      <span className="font-bold text-lg">
+                        {stockMovementDialog.movement && !isNaN(stockMovementDialog.movement) ? (
+                          stockMovementDialog.type === 'in' ? 
+                            parseFloat(stockMovementDialog.article.quantite_stock) + parseFloat(stockMovementDialog.movement || 0) :
+                            parseFloat(stockMovementDialog.article.quantite_stock) - parseFloat(stockMovementDialog.movement || 0)
+                        ) : stockMovementDialog.article.quantite_stock}
+                      </span>
+                      {stockMovementDialog.movement && !isNaN(stockMovementDialog.movement) && (
+                        <span className={`ml-2 text-sm ${
+                          (stockMovementDialog.type === 'in' ? 
+                            parseFloat(stockMovementDialog.article.quantite_stock) + parseFloat(stockMovementDialog.movement) :
+                            parseFloat(stockMovementDialog.article.quantite_stock) - parseFloat(stockMovementDialog.movement)
+                          ) <= stockMovementDialog.article.stock_minimum ? 'text-red-600 font-bold' : 'text-green-600'
+                        }`}>
+                          {(stockMovementDialog.type === 'in' ? 
+                            parseFloat(stockMovementDialog.article.quantite_stock) + parseFloat(stockMovementDialog.movement) :
+                            parseFloat(stockMovementDialog.article.quantite_stock) - parseFloat(stockMovementDialog.movement)
+                          ) <= stockMovementDialog.article.stock_minimum ? '⚠️ Stock bas' : '✅ Stock correct'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setStockMovementDialog({ open: false, article: null, movement: '', reason: '', type: 'in' })}
+                    className="px-6"
+                  >
+                    ❌ Annuler
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={loading || !stockMovementDialog.movement} 
+                    className="px-6 bg-green-600 hover:bg-green-700"
+                  >
+                    {loading ? '⏳ Enregistrement...' : `✅ ${stockMovementDialog.type === 'in' ? 'Entrée' : 'Sortie'} Stock`}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
           {/* Global Payment Dialog - Can be triggered from any tab */}
           <Dialog open={isPaiementDialogOpen} onOpenChange={setIsPaiementDialogOpen}>
             <DialogContent className="sm:max-w-[600px]">
