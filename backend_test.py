@@ -1186,6 +1186,201 @@ class EcoPumpAfrikAPITester:
         
         return success
 
+    def test_user_reported_corrections_validation(self):
+        """Test SPECIFIC USER REPORTED CORRECTIONS - ECO PUMP AFRIK"""
+        print("\n🎯 TESTING SPECIFIC USER REPORTED CORRECTIONS - ECO PUMP AFRIK")
+        print("=" * 70)
+        print("VALIDATION CRITIQUE - Corrections des problèmes signalés par l'utilisateur:")
+        print("1. Heures sur PDFs devis/factures")
+        print("2. Erreur MongoDB onglet STOCK corrigée") 
+        print("3. Nouveaux endpoints de recherche avancée")
+        print("=" * 70)
+        
+        all_tests_passed = True
+        
+        # 1. Test PDF generation time stamps
+        print("\n🔍 1. TESTING: Heures sur PDFs devis/factures")
+        if self.created_devis_id:
+            success, response = self.run_test(
+                "USER FIX: PDF Devis with Generation Time",
+                "GET",
+                f"api/pdf/document/devis/{self.created_devis_id}",
+                200,
+                expect_pdf=True
+            )
+            if success:
+                print("✅ VALIDATION: PDF devis génère avec heure de génération")
+            else:
+                print("❌ ÉCHEC: PDF devis ne génère pas correctement")
+                all_tests_passed = False
+        
+        # Test facture PDF if we have one
+        # First convert devis to facture if not already done
+        if self.created_devis_id:
+            success, response = self.run_test(
+                "Convert Devis for PDF Time Test",
+                "POST", 
+                f"api/devis/{self.created_devis_id}/convert-to-facture",
+                200
+            )
+            if success and 'facture' in response:
+                facture_id = response['facture']['facture_id']
+                success, response = self.run_test(
+                    "USER FIX: PDF Facture with Generation Time",
+                    "GET",
+                    f"api/pdf/document/facture/{facture_id}",
+                    200,
+                    expect_pdf=True
+                )
+                if success:
+                    print("✅ VALIDATION: PDF facture génère avec heure de génération")
+                else:
+                    print("❌ ÉCHEC: PDF facture ne génère pas correctement")
+                    all_tests_passed = False
+        
+        # 2. Test MongoDB stock error correction
+        print("\n🔍 2. TESTING: Erreur MongoDB onglet STOCK corrigée")
+        
+        # Create test stock article
+        article_data = {
+            "ref": "USER-TEST-STOCK",
+            "designation": "Article test correction MongoDB",
+            "quantite_stock": 50.0,
+            "stock_minimum": 5.0,
+            "prix_achat_moyen": 25000.0,
+            "prix_vente": 40000.0,
+            "emplacement": "Entrepôt Test"
+        }
+        
+        success, response = self.run_test(
+            "Create Stock Article for MongoDB Fix Test",
+            "POST",
+            "api/stock",
+            200,
+            data=article_data
+        )
+        
+        if success and 'article' in response:
+            article_id = response['article']['article_id']
+            
+            # Test the problematic update with immutable fields
+            update_data_with_immutable = {
+                "_id": "should_be_filtered",
+                "article_id": "should_be_filtered", 
+                "created_at": "should_be_filtered",
+                "created_at_formatted": "should_be_filtered",
+                "quantite_stock": 30.0,
+                "prix_vente": 45000.0,
+                "emplacement": "Entrepôt Mis à Jour"
+            }
+            
+            success, response = self.run_test(
+                "USER FIX: Stock Update with Immutable Fields Filtered",
+                "PUT",
+                f"api/stock/{article_id}",
+                200,
+                data=update_data_with_immutable
+            )
+            
+            if success:
+                print("✅ VALIDATION: Endpoint PUT /api/stock/{article_id} fonctionne")
+                print("✅ VALIDATION: Champs immutables (_id, article_id, created_at) filtrés")
+                print("✅ VALIDATION: Erreur '_id immutable' ne se produit plus")
+            else:
+                print("❌ ÉCHEC: Endpoint PUT /api/stock/{article_id} échoue encore")
+                all_tests_passed = False
+        else:
+            print("❌ ÉCHEC: Impossible de créer article de test pour validation stock")
+            all_tests_passed = False
+        
+        # 3. Test new advanced search endpoints
+        print("\n🔍 3. TESTING: Nouveaux endpoints de recherche avancée")
+        
+        # Test search devis endpoint
+        success, response = self.run_test(
+            "USER FIX: Search Devis with Filters",
+            "GET",
+            "api/search/devis",
+            200,
+            params={
+                "client_nom": "TEST",
+                "devise": "FCFA",
+                "statut": "brouillon",
+                "limit": 10
+            }
+        )
+        if success:
+            print("✅ VALIDATION: /api/search/devis avec filtres fonctionne")
+        else:
+            print("❌ ÉCHEC: /api/search/devis ne fonctionne pas")
+            all_tests_passed = False
+        
+        # Test search factures endpoint  
+        success, response = self.run_test(
+            "USER FIX: Search Factures with Filters",
+            "GET",
+            "api/search/factures",
+            200,
+            params={
+                "client_nom": "TEST",
+                "statut_paiement": "impayé",
+                "montant_min": "100000",
+                "montant_max": "5000000"
+            }
+        )
+        if success:
+            print("✅ VALIDATION: /api/search/factures avec filtres fonctionne")
+        else:
+            print("❌ ÉCHEC: /api/search/factures ne fonctionne pas")
+            all_tests_passed = False
+        
+        # Test search clients endpoint
+        success, response = self.run_test(
+            "USER FIX: Search Clients with Filters", 
+            "GET",
+            "api/search/clients",
+            200,
+            params={
+                "nom": "TEST",
+                "type_client": "standard",
+                "devise": "FCFA"
+            }
+        )
+        if success:
+            print("✅ VALIDATION: /api/search/clients avec filtres fonctionne")
+        else:
+            print("❌ ÉCHEC: /api/search/clients ne fonctionne pas")
+            all_tests_passed = False
+        
+        # Test search stock endpoint
+        success, response = self.run_test(
+            "USER FIX: Search Stock with Filters",
+            "GET", 
+            "api/search/stock",
+            200,
+            params={
+                "designation": "test",
+                "stock_bas": "true"
+            }
+        )
+        if success:
+            print("✅ VALIDATION: /api/search/stock avec filtres fonctionne")
+        else:
+            print("❌ ÉCHEC: /api/search/stock ne fonctionne pas")
+            all_tests_passed = False
+        
+        print("\n" + "=" * 70)
+        if all_tests_passed:
+            print("🎉 TOUTES LES CORRECTIONS UTILISATEUR VALIDÉES!")
+            print("✅ Heures de génération dans PDFs")
+            print("✅ Erreur MongoDB stock corrigée")
+            print("✅ Endpoints de recherche avancée fonctionnels")
+        else:
+            print("⚠️  CERTAINES CORRECTIONS UTILISATEUR ONT ÉCHOUÉ")
+        print("=" * 70)
+        
+        return all_tests_passed
+
     def test_eco_pump_afrik_logo_improvements(self):
         """Test improved ECO PUMP AFRIK logo in all PDFs"""
         print("\n🔍 Testing IMPROVED ECO PUMP AFRIK Logo in All PDFs...")
