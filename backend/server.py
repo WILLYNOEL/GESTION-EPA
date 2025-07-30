@@ -261,8 +261,11 @@ async def create_client(client: Client):
     try:
         client_data = client.dict()
         client_data["client_id"] = generate_id()
-        client_data["created_at"] = datetime.now().isoformat()
-        client_data["updated_at"] = datetime.now().isoformat()
+        current_time = datetime.now()
+        client_data["created_at"] = current_time.isoformat()
+        client_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        client_data["updated_at"] = current_time.isoformat()
+        client_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = clients_collection.insert_one(client_data)
         
