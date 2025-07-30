@@ -1473,17 +1473,20 @@ def main():
     test_results.append(tester.test_pdf_content_headers())
     test_results.append(tester.test_pdf_with_real_data())
     
-    # 🚨 CRITICAL NEW CORRECTIONS TESTING - HIGHEST PRIORITY
+    # 🚨 CRITICAL USER REPORTED CORRECTIONS - HIGHEST PRIORITY
     print("\n" + "=" * 70)
-    print("🚨 TESTING CRITICAL CORRECTIONS - ECO PUMP AFRIK USER REPORTS")
+    print("🚨 TESTING USER REPORTED CORRECTIONS - ECO PUMP AFRIK")
     print("=" * 70)
-    print("Testing the 4 CRITICAL corrections from user bug reports:")
-    print("1. Balance clients table overflow fix")
-    print("2. ECO PUMP AFRIK logo with visible border")  
-    print("3. Period filters for reports")
-    print("4. Updated contact email")
+    print("VALIDATION CRITIQUE - Corrections des problèmes signalés:")
+    print("1. Heures sur PDFs devis/factures")
+    print("2. Erreur MongoDB onglet STOCK corrigée")
+    print("3. Nouveaux endpoints de recherche avancée")
     print("=" * 70)
     
+    # Primary user validation test
+    test_results.append(tester.test_user_reported_corrections_validation())
+    
+    # Additional critical corrections
     test_results.append(tester.test_critical_corrections_balance_clients_overflow())
     test_results.append(tester.test_critical_corrections_logo_with_border())
     test_results.append(tester.test_critical_corrections_period_filters())
