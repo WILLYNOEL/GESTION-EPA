@@ -176,6 +176,7 @@ function App() {
   const [devisSearch, setDevisSearch] = useState('');
   const [facturesSearch, setFacturesSearch] = useState('');
   const [paiementsSearch, setPaiementsSearch] = useState('');
+  const [documentSearch, setDocumentSearch] = useState('');  // Nouveau état pour recherche de documents
 
   // Search functions for intelligent loading
   const handleClientsSearch = () => {
