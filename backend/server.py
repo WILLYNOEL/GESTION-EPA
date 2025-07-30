@@ -359,9 +359,14 @@ async def delete_client(client_id: str):
 async def create_fournisseur(fournisseur: Fournisseur):
     try:
         fournisseur_data = fournisseur.dict()
+        current_time = datetime.now()
+        
+        # Generate fournisseur ID
         fournisseur_data["fournisseur_id"] = generate_id()
-        fournisseur_data["created_at"] = datetime.now().isoformat()
-        fournisseur_data["updated_at"] = datetime.now().isoformat()
+        fournisseur_data["created_at"] = current_time.isoformat()
+        fournisseur_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        fournisseur_data["updated_at"] = current_time.isoformat()
+        fournisseur_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         
         result = fournisseurs_collection.insert_one(fournisseur_data)
         
