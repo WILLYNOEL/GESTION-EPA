@@ -331,12 +331,6 @@ function App() {
     if (currentUser.role === 'admin') return true; // Les admins ont accès à tout
     return currentUser.permissions[tabName] === true;
   };
-
-  // Fonction pour afficher l'onglet seulement si autorisé
-  const renderTabContent = (tabName, content) => {
-    if (!hasPermission(tabName)) return null;
-    return content;
-  };
   const fetchAll = async () => {
     try {
       const [
