@@ -681,6 +681,93 @@ class EcoPumpAfrikAPITester:
         
         return success
 
+    def test_eco_pump_afrik_branding(self):
+        """Test ECO PUMP AFRIK branding in PDFs - CRITICAL CORRECTION"""
+        print("\n🔍 Testing ECO PUMP AFRIK Branding in PDFs...")
+        
+        if not self.created_devis_id:
+            print("❌ Skipping branding test - No devis ID available")
+            return False
+        
+        url = f"{self.base_url}/api/pdf/document/devis/{self.created_devis_id}"
+        
+        try:
+            response = requests.get(url)
+            
+            if response.status_code == 200:
+                # Check if PDF contains ECO PUMP AFRIK branding
+                pdf_content = response.content
+                
+                # Convert PDF content to string for text search (basic check)
+                # Note: This is a simplified check - in production you'd use a PDF parser
+                pdf_text = str(pdf_content)
+                
+                branding_found = False
+                eco_pump_indicators = [
+                    b'ECO PUMP AFRIK',
+                    b'Gestion Intelligente',
+                    b'Solutions Hydrauliques',
+                    b'SARL ECO PUMP AFRIK',
+                    b'ecopumpafrik.com'
+                ]
+                
+                for indicator in eco_pump_indicators:
+                    if indicator in pdf_content:
+                        branding_found = True
+                        print(f"✅ BRANDING VERIFIED: Found '{indicator.decode()}' in PDF")
+                        break
+                
+                if branding_found:
+                    print("✅ CRITICAL FIX VERIFIED: ECO PUMP AFRIK branding is present in PDFs")
+                    return True
+                else:
+                    print("❌ CRITICAL ISSUE: ECO PUMP AFRIK branding NOT found in PDF")
+                    return False
+                
+            else:
+                print(f"❌ Failed to get PDF for branding test - Status: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error testing ECO PUMP AFRIK branding: {str(e)}")
+            return False
+
+    def test_new_report_endpoints_specifically(self):
+        """Test the newly added report endpoints specifically"""
+        print("\n🔍 Testing NEWLY ADDED Report Endpoints (journal_achats & balance_fournisseurs)...")
+        
+        # Test journal_achats specifically
+        success, response = self.run_test(
+            "NEW ENDPOINT: Journal des Achats PDF",
+            "GET",
+            "api/pdf/rapport/journal_achats",
+            200,
+            expect_pdf=True
+        )
+        
+        if not success:
+            print("❌ CRITICAL: journal_achats endpoint failed - this was newly added!")
+            return False
+        else:
+            print("✅ VERIFIED: journal_achats endpoint works correctly")
+        
+        # Test balance_fournisseurs specifically  
+        success, response = self.run_test(
+            "NEW ENDPOINT: Balance Fournisseurs PDF",
+            "GET",
+            "api/pdf/rapport/balance_fournisseurs",
+            200,
+            expect_pdf=True
+        )
+        
+        if not success:
+            print("❌ CRITICAL: balance_fournisseurs endpoint failed - this was newly added!")
+            return False
+        else:
+            print("✅ VERIFIED: balance_fournisseurs endpoint works correctly")
+        
+        return True
+
 def main():
     print("🚀 Starting ECO PUMP AFRIK API Tests")
     print("=" * 50)
