@@ -193,6 +193,20 @@ class Paiement(BaseModel):
     statut: str = "validé"
     created_at: str = None
 
+# ECO PUMP AFRIK Logo en base64 (version simplifiée pour les PDFs)
+ECO_PUMP_LOGO_B64 = """
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+"""
+
+def get_logo_image():
+    """Create a logo placeholder for PDFs"""
+    try:
+        # For now, we'll create a simple text-based logo since we don't have the actual logo file
+        # In production, you would load the actual logo file
+        return None  # Will use text-based branding instead
+    except:
+        return None
+
 # Helper functions
 def generate_id():
     return str(uuid.uuid4())
