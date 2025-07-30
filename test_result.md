@@ -202,9 +202,33 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Specialized list generation - Factures impayées"
+    implemented: true
+    working: "unknown"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "unknown"
+        - agent: "main"
+        - comment: "NOUVELLES FONCTIONNALITÉS IMPLÉMENTÉES: Endpoints backend /api/pdf/liste/factures-impayees, /api/pdf/liste/factures, /api/pdf/liste/devis ajoutés avec support filtres période (date_debut/date_fin). Interface frontend avec cards spécialisées dans onglet Rapports pour générer listes PDF professionnelles avec logo ECO PUMP AFRIK. Fonction handleGenerateList() intégrée avec gestion période. BESOIN TESTS COMPLETS pour vérifier fonctionnalité end-to-end."
+
+  - task: "Specialized list generation - Toutes factures et devis"
+    implemented: true
+    working: "unknown"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "unknown"
+        - agent: "main"
+        - comment: "NOUVELLES LISTES SPÉCIALISÉES: Cards UI ajoutées pour 'Toutes les Factures' et 'Tous les Devis' avec statistiques temps réel (nombre total, chiffre d'affaires, taux conversion). Endpoints PDF avec même branding professionnel que rapports existants. Filtres période intégrés. Interface moderne avec couleurs distinctives (rouge pour impayées, bleu pour factures, vert pour devis). BESOIN VALIDATION FONCTIONNEMENT COMPLET."
+
 agent_communication:
     - agent: "main"
-    - message: "🎉 TOUTES LES CORRECTIONS CRITIQUES FINALISÉES ET VALIDÉES (98,5% succès - 66/67 tests) ✅ (1) Tableau balance clients corrigé - largeurs colonnes strictes [90,30,25,25,70,70,70], troncature noms >18 chars, police réduite 8pt/7pt, (2) Logo ECO PUMP AFRIK VISIBLE - bordure bleue + fond gris sur TOUS PDFs, numéro 074857656 supprimé complètement, (3) Filtres période fonctionnels - tous rapports acceptent date_debut/date_fin, (4) Email contact@ecopumpafrik.com mis à jour partout, (5) Fenêtre paiement redesignée avec icônes et meilleure présentation. Backend prêt production, frontend avec filtres période ajoutés. TOUS PROBLÈMES UTILISATEUR DÉFINITIVEMENT RÉSOLUS!"
+    - message: "🎯 NOUVELLES FONCTIONNALITÉS SPÉCIALISÉES IMPLÉMENTÉES - BESOIN TESTS URGENTS: (1) LISTES SPÉCIALISÉES BACKEND - 3 nouveaux endpoints /api/pdf/liste/{factures-impayees|factures|devis} avec support filtres période date_debut/date_fin, branding ECO PUMP AFRIK professionnel, gestion erreurs, (2) INTERFACE FRONTEND MODERNE - Cards spécialisées dans onglet Rapports avec statistiques temps réel, couleurs distinctives (rouge=impayées, bleu=factures, vert=devis), intégration handleGenerateList(), (3) FILTRES PÉRIODE INTÉGRÉS - Utilisation rapportFilters.date_debut/date_fin pour filtrage temporel, (4) STATISTIQUES DYNAMIQUES - Calculs automatiques montants, nombres, pourcentages par type document. STATUT: Backend/Frontend implémentés, BESOIN TESTS EXHAUSTIFS pour validation end-to-end avant production."
     - agent: "testing"
     - message: "✅ TESTS COMPLETS TERMINÉS - TOUS LES ENDPOINTS PDF FONCTIONNENT PARFAITEMENT! Validation exhaustive effectuée: (1) Documents PDF: devis/facture/paiement génèrent des PDFs professionnels avec branding ECO PUMP AFRIK, (2) Rapports PDF: journal_ventes, balance_clients, tresorerie, compte_resultat tous fonctionnels avec données réelles, (3) Gestion d'erreurs: 400 pour types invalides, 404 pour documents inexistants, (4) Headers corrects: application/pdf, (5) Tailles appropriées: 2-4KB par PDF. Les boutons d'action qui affichaient 'Not Found' sont maintenant corrigés. PRÊT POUR PRODUCTION."
     - agent: "testing"
