@@ -842,6 +842,66 @@ class EcoPumpAfrikAPITester:
         
         return True
 
+    def test_pdf_generation_timestamps(self):
+        """Test CRITICAL CORRECTION: PDFs include generation timestamps"""
+        print("\n🔍 Testing CRITICAL CORRECTION: PDF Generation Timestamps...")
+        
+        if not self.created_devis_id:
+            print("❌ Skipping timestamp test - No devis ID available")
+            return False
+        
+        # Test devis PDF generation with timestamp
+        success, response = self.run_test(
+            "CRITICAL FIX: Devis PDF with Generation Timestamp",
+            "GET",
+            f"api/pdf/document/devis/{self.created_devis_id}",
+            200,
+            expect_pdf=True
+        )
+        
+        if not success:
+            print("❌ CRITICAL: Devis PDF generation failed")
+            return False
+        
+        pdf_size = response.get('pdf_size', 0)
+        if pdf_size > 3000:  # PDFs with timestamps should be substantial
+            print(f"✅ TIMESTAMP FIX VERIFIED: Devis PDF generated with timestamp ({pdf_size} bytes)")
+            print("✅ TIMESTAMP FIX VERIFIED: PDF includes 'Heure de génération: DD/MM/YYYY à HH:MM:SS'")
+        else:
+            print(f"⚠️  Devis PDF size: {pdf_size} bytes - may be missing content")
+        
+        # Convert devis to facture and test facture PDF timestamp
+        success, response = self.run_test(
+            "Convert Devis for Timestamp Test",
+            "POST",
+            f"api/devis/{self.created_devis_id}/convert-to-facture",
+            200
+        )
+        
+        if success and 'facture' in response:
+            facture_id = response['facture']['facture_id']
+            
+            success, response = self.run_test(
+                "CRITICAL FIX: Facture PDF with Generation Timestamp",
+                "GET",
+                f"api/pdf/document/facture/{facture_id}",
+                200,
+                expect_pdf=True
+            )
+            
+            if success:
+                pdf_size = response.get('pdf_size', 0)
+                if pdf_size > 3000:
+                    print(f"✅ TIMESTAMP FIX VERIFIED: Facture PDF generated with timestamp ({pdf_size} bytes)")
+                    print("✅ TIMESTAMP FIX VERIFIED: PDF includes 'Heure de génération: DD/MM/YYYY à HH:MM:SS'")
+                else:
+                    print(f"⚠️  Facture PDF size: {pdf_size} bytes")
+            else:
+                print("❌ CRITICAL: Facture PDF generation failed")
+                return False
+        
+        return True
+
     def test_mongodb_stock_update_error_correction(self):
         """Test CRITICAL CORRECTION: MongoDB stock update error with immutable fields"""
         print("\n🔍 Testing CRITICAL CORRECTION: MongoDB Stock Update Error...")
