@@ -767,10 +767,10 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
             header_style.textColor = colors.HexColor('#0066cc')
             header_style.alignment = 1  # Center alignment
             
-            # Create ECO PUMP AFRIK branded header with better formatting
+            # Create ECO PUMP AFRIK branded header with better formatting (no phone number)
             header_table_data = [
-                ["🏭", "ECO PUMP AFRIK", "📞 +225 0748576956"],
-                ["💧", "Solutions Hydrauliques Professionnelles", "📧 contact@ecopumpafrik.com"],
+                ["🏭", "ECO PUMP AFRIK", "📧 contact@ecopumpafrik.com"],
+                ["💧", "Solutions Hydrauliques Professionnelles", "📞 +225 0707806359"],
                 ["🔧", "Gestion Intelligente", "🌐 www.ecopumpafrik.com"]
             ]
             
@@ -792,6 +792,8 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
                 ('TOPPADDING', (0, 0), (-1, -1), 3),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0066cc')),  # Add border to make logo visible
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8f9fa')),  # Light background
             ]))
             
             story.append(header_table)
