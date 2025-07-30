@@ -391,51 +391,108 @@ function App() {
     try {
       setLoading(true);
       
-      // Simulate PDF generation
       const response = await axios.get(`${API_BASE_URL}/api/${type.replace('recu', 'paiements')}/${id}`);
       const document = response.data[type] || response.data.devis || response.data.facture || response.data.paiement;
       
-      // Create downloadable content
-      const content = `ECO PUMP AFRIK - Gestion Intelligente
-      
-${type.toUpperCase()} - ${document.numero_devis || document.numero_facture || 'RECU-' + id}
-Date: ${formatDate(document.date_devis || document.date_facture || document.date_paiement)}
-Client: ${document.client_nom || 'N/A'}
+      if (type === 'devis' || type === 'facture') {
+        // Create professional document content
+        const docType = type.toUpperCase();
+        const numero = document.numero_devis || document.numero_facture;
+        
+        const content = `
+═══════════════════════════════════════════════════════════════
+🏭 ECO PUMP AFRIK - Gestion Intelligente
+═══════════════════════════════════════════════════════════════
 
-${type === 'devis' || type === 'facture' ? `
-Articles:
-${document.articles?.map(a => `- ${a.designation}: ${a.quantite} x ${formatCurrency(a.prix_unitaire)} = ${formatCurrency(a.total)}`).join('\n') || ''}
+                            ${docType}
+                           N° ${numero}
+                      Date: ${formatDate(document.date_devis || document.date_facture)}
 
-Sous-total: ${formatCurrency(document.sous_total)}
-TVA (18%): ${formatCurrency(document.tva)}
-Total TTC: ${formatCurrency(document.total_ttc)}
-` : `
-Montant: ${formatCurrency(document.montant)}
+─────────────────────────────────────────────────────────────────
+
+FACTURER À:
+${document.client_nom}
+${document.reference_commande ? 'Référence: ' + document.reference_commande : ''}
+
+─────────────────────────────────────────────────────────────────
+ARTICLES:
+─────────────────────────────────────────────────────────────────
+${'Item'.padEnd(6)} ${'REF'.padEnd(12)} ${'Désignation'.padEnd(30)} ${'Qté'.padEnd(8)} ${'PU (HT)'.padEnd(15)} ${'TOTAL (HT)'.padEnd(15)}
+─────────────────────────────────────────────────────────────────
+${document.articles?.map(a => 
+  `${String(a.item).padEnd(6)} ${(a.ref || '').padEnd(12)} ${a.designation.padEnd(30)} ${String(a.quantite).padEnd(8)} ${formatCurrency(a.prix_unitaire, document.devise).padEnd(15)} ${formatCurrency(a.total, document.devise).padEnd(15)}`
+).join('\n') || ''}
+─────────────────────────────────────────────────────────────────
+
+TOTAUX:
+                                        Sous-total: ${formatCurrency(document.sous_total, document.devise)}
+                                        TVA (18%):  ${formatCurrency(document.tva, document.devise)}
+                                        ═══════════════════════════════════
+                                        TOTAL TTC:  ${formatCurrency(document.total_ttc, document.devise)}
+                                        Net à Payer: ${formatCurrency(document.net_a_payer, document.devise)}
+
+─────────────────────────────────────────────────────────────────
+MODALITÉS:
+${document.delai_livraison ? 'Délai de livraison: ' + document.delai_livraison + '\n' : ''}${document.conditions_paiement ? 'Conditions de paiement: ' + document.conditions_paiement + '\n' : ''}${document.mode_livraison ? 'Mode de livraison: ' + document.mode_livraison + '\n' : ''}
+"Nos commandes se veulent fermes et irrévocables"
+
+═══════════════════════════════════════════════════════════════
+ECO PUMP AFRIK
+SARL au Capital de 1 000 000 F CFA
+Siège Social: Cocody - Angré 7e Tranche
+Tél: +225 0748576956 / +225 0707806359
+Email: ouanlo.ouattara@ecopumpafrik.com
+Site WEB: www.ecopumpafrik.com
+RCCM: CI-ABJ-2024-B-12345 | N°CC: 2407891H
+ECOBANK: CI05 CI041 01234567890123456789 01
+═══════════════════════════════════════════════════════════════
+        `;
+
+        // Create and download file
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${docType}_${numero}_${new Date().toISOString().split('T')[0]}.txt`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert(`✅ ${docType} ${numero} téléchargé avec succès !`);
+      } else {
+        // For receipts and other documents
+        const content = `
+═══════════════════════════════════════════════════════════════
+🏭 ECO PUMP AFRIK - REÇU DE PAIEMENT
+═══════════════════════════════════════════════════════════════
+
+Date: ${formatDate(document.date_paiement)}
+Montant: ${formatCurrency(document.montant, document.devise)}
 Mode: ${document.mode_paiement}
 Référence: ${document.reference_paiement || 'N/A'}
-`}
 
-SARL U au Capital de 1 000 000 F CFA
-Siege Social : Cocody Angré 7e Tranche
-Tel/FAX : +225 0707806359
-Email : ouanlo.ouattara@ecopumpafrik.com
-Site WEB : www.ecopumpafrik.com`;
-
-      // Create and download file
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${type.toUpperCase()}_${document.numero_devis || document.numero_facture || id}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+═══════════════════════════════════════════════════════════════
+        `;
+        
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `RECU_${id}_${new Date().toISOString().split('T')[0]}.txt`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert(`✅ Reçu téléchargé avec succès !`);
+      }
       
-      alert(`${type.toUpperCase()} téléchargé avec succès !`);
     } catch (error) {
       console.error(`Error downloading ${type}:`, error);
-      alert(`Erreur lors du téléchargement: ${error.response?.data?.detail || error.message}`);
+      alert(`❌ Erreur lors du téléchargement: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }
