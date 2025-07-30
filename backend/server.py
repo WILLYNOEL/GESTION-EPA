@@ -884,10 +884,25 @@ async def generate_document_pdf(doc_type: str, doc_id: str):
                 story.append(table)
                 story.append(Spacer(1, 20))
                 
-                # Totals
+                # Totals with color coding
                 story.append(Paragraph(f"<b>Sous-total:</b> {document['sous_total']:,.2f} {document['devise']}", styles['Normal']))
                 story.append(Paragraph(f"<b>TVA (18%):</b> {document['tva']:,.2f} {document['devise']}", styles['Normal']))
-                story.append(Paragraph(f"<b>TOTAL TTC:</b> {document['total_ttc']:,.2f} {document['devise']}", styles['Heading2']))
+                
+                # Total with color based on payment status
+                if doc_type == "facture":
+                    statut_paiement = document.get('statut_paiement', 'impayé')
+                    if statut_paiement == 'payé':
+                        total_color = '#28a745'  # Green for paid
+                        total_text = f"<b><font color='{total_color}'>TOTAL TTC (PAYÉ):</font></b> <font color='{total_color}'>{document['total_ttc']:,.2f} {document['devise']}</font>"
+                    else:
+                        total_color = '#dc3545'  # Red for unpaid
+                        total_text = f"<b><font color='{total_color}'>TOTAL TTC (À PAYER):</font></b> <font color='{total_color}'>{document['total_ttc']:,.2f} {document['devise']}</font>"
+                else:
+                    # For devis, use normal blue color
+                    total_color = '#0066cc'
+                    total_text = f"<b><font color='{total_color}'>TOTAL TTC:</font></b> <font color='{total_color}'>{document['total_ttc']:,.2f} {document['devise']}</font>"
+                
+                story.append(Paragraph(total_text, styles['Heading2']))
                 story.append(Spacer(1, 15))
                 
                 # Terms and conditions
