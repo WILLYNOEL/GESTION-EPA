@@ -1022,34 +1022,45 @@ async def generate_report_pdf(report_type: str):
                 story.append(Paragraph("BALANCE CLIENTS", title_style))
                 story.append(Spacer(1, 20))
                 
-                # Client balance table
-                balance_data = [["Client", "Type", "Devise", "Nb Factures", "Total Facturé", "Total Payé", "Solde"]]
+                # Client balance table with strictly controlled column widths
+                balance_data = [["Client", "Type", "Dev", "Fact", "Facturé", "Payé", "Solde"]]
                 for client in clients_data:
                     client_factures = [f for f in factures_data if f.get('client_id') == client.get('client_id')]
                     total_facture = sum(f.get('total_ttc', 0) for f in client_factures)
                     total_paye = sum(f.get('montant_paye', 0) for f in client_factures)
                     solde = total_facture - total_paye
                     
+                    # Truncate long client names to fit
+                    client_nom = client.get('nom', '')
+                    if len(client_nom) > 18:
+                        client_nom = client_nom[:18] + "..."
+                    
                     balance_data.append([
-                        client.get('nom', ''),
-                        client.get('type_client', ''),
-                        client.get('devise', ''),
+                        client_nom,
+                        client.get('type_client', '')[:4],  # Truncate type
+                        client.get('devise', '')[:4],
                         str(len(client_factures)),
-                        f"{total_facture:,.2f}",
-                        f"{total_paye:,.2f}",
-                        f"{solde:,.2f}"
+                        f"{total_facture:,.0f}",
+                        f"{total_paye:,.0f}",
+                        f"{solde:,.0f}"
                     ])
                 
-                balance_table = Table(balance_data)
+                # Very strict column widths (total = 480)
+                balance_table = Table(balance_data, colWidths=[90, 30, 25, 25, 70, 70, 70])
                 balance_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Left align client names
+                    ('ALIGN', (4, 1), (-1, -1), 'RIGHT'), # Right align amounts
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 9),
-                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('FONTSIZE', (0, 0), (-1, 0), 8),  # Smaller header font
+                    ('FONTSIZE', (0, 1), (-1, -1), 7),  # Smaller content font
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                    ('TOPPADDING', (0, 0), (-1, -1), 2),
+                    ('BOTTOMPADDING', (0, 1), (-1, -1), 2),
                     ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black)
                 ]))
                 story.append(balance_table)
                 
