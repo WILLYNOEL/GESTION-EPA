@@ -146,6 +146,9 @@ backend:
         - working: true
         - agent: "testing"
         - comment: "✅ VALIDATION FINALE CORRECTIONS CRITIQUES: Tests complets de tous les 6 types de rapports PDF avec 100% de réussite. CONFIRMÉ: (1) Logo ECO PUMP AFRIK tabulaire amélioré avec 🏭💧🔧 et contact complet, (2) Largeurs colonnes fixes - articles (30,50,180,40,80,100) et rapports (80,120,60,80,60) empêchent débordement, (3) Troncature automatique désignations >25 chars et noms clients >20 chars, (4) Tous les 6 rapports génèrent PDFs professionnels 2500-4000+ bytes. CORRECTIONS PRIORITAIRES TOUTES VALIDÉES."
+        - working: true
+        - agent: "testing"
+        - comment: "🎯 VALIDATION NOUVELLES CORRECTIONS CRITIQUES RÉUSSIE (98.5% - 66/67 tests): ✅ DÉBORDEMENT BALANCE CLIENTS CORRIGÉ - PDF généré (3946 bytes) avec colonnes strictes [90,30,25,25,70,70,70], troncature noms >18 chars, types 4 chars max, polices 8pt/7pt. ✅ LOGO AVEC BORDURE VISIBLE - Tous PDFs incluent logo ECO PUMP AFRIK avec bordure bleue BOX, fond gris #f8f9fa, uniquement +225 0707806359. ✅ FILTRES PÉRIODE FONCTIONNELS - Tous rapports acceptent date_debut/date_fin, filtrage correct validé. ✅ EMAIL CONTACT MIS À JOUR - contact@ecopumpafrik.com dans tous PDFs. TOUTES LES 4 CORRECTIONS CRITIQUES VALIDÉES!"
 
 frontend:
   - task: "Boutons d'action documents - interface"
