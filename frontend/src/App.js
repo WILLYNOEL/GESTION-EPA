@@ -1949,6 +1949,107 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 </DialogContent>
               </Dialog>
             </div>
+            
+            {/* Advanced Search Filters for Devis */}
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Search className="mr-2 h-5 w-5 text-blue-600" />
+                  Recherche Avancée & Filtres
+                </CardTitle>
+                <CardDescription>
+                  Filtrez les devis par client, date, montant ou statut
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="filter_client_nom">Nom du client</Label>
+                    <Input
+                      id="filter_client_nom"
+                      placeholder="Nom du client..."
+                      value={devisFilters.client_nom}
+                      onChange={(e) => setDevisFilters({ ...devisFilters, client_nom: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="filter_numero_devis">N° Devis</Label>
+                    <Input
+                      id="filter_numero_devis"
+                      placeholder="DEV/CLIENT/..."
+                      value={devisFilters.numero_devis}
+                      onChange={(e) => setDevisFilters({ ...devisFilters, numero_devis: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="filter_devise_devis">Devise</Label>
+                    <Select value={devisFilters.devise} onValueChange={(value) => setDevisFilters({ ...devisFilters, devise: value })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Toutes devises" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Toutes devises</SelectItem>
+                        <SelectItem value="FCFA">FCFA</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="filter_date_debut_devis">Date début</Label>
+                    <Input
+                      id="filter_date_debut_devis"
+                      type="date"
+                      value={devisFilters.date_debut}
+                      onChange={(e) => setDevisFilters({ ...devisFilters, date_debut: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="filter_date_fin_devis">Date fin</Label>
+                    <Input
+                      id="filter_date_fin_devis"
+                      type="date"
+                      value={devisFilters.date_fin}
+                      onChange={(e) => setDevisFilters({ ...devisFilters, date_fin: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="filter_statut_devis">Statut</Label>
+                    <Select value={devisFilters.statut} onValueChange={(value) => setDevisFilters({ ...devisFilters, statut: value })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Tous statuts" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Tous statuts</SelectItem>
+                        <SelectItem value="en_attente">En attente</SelectItem>
+                        <SelectItem value="accepte">Accepté</SelectItem>
+                        <SelectItem value="refuse">Refusé</SelectItem>
+                        <SelectItem value="expire">Expiré</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleResetFilters('devis')}
+                    disabled={loading}
+                  >
+                    🗑️ Effacer les filtres
+                  </Button>
+                  <Button 
+                    onClick={() => handleAdvancedSearch('devis', devisFilters)}
+                    disabled={loading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {loading ? '⏳ Recherche...' : '🔍 Rechercher'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             <Card>
               <CardContent className="p-0">
