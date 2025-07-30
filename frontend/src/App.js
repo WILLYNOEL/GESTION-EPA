@@ -233,21 +233,152 @@ function App() {
       const response = await axios.get(`${API_BASE_URL}/api/${type}/${id}`);
       const document = response.data[type] || response.data.client || response.data.fournisseur || response.data.article;
       
-      // Create a detailed view modal
-      const details = JSON.stringify(document, null, 2);
-      const docType = type === 'facture' ? 'Facture' : 
-                     type === 'devis' ? 'Devis' : 
-                     type === 'client' ? 'Client' : 
-                     type === 'fournisseur' ? 'Fournisseur' : 
-                     type === 'stock' ? 'Article' : 'Document';
+      // Create professional document view with ECO PUMP AFRIK branding
+      if (type === 'devis' || type === 'facture') {
+        const docType = type === 'facture' ? 'FACTURE' : 'DEVIS';
+        const numero = document.numero_devis || document.numero_facture;
+        
+        // Create a new window with professional document layout
+        const newWindow = window.open('', '_blank', 'width=800,height=1000');
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${docType} - ${numero}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+              .document { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+              .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0066cc; padding-bottom: 20px; margin-bottom: 30px; }
+              .logo { font-size: 24px; font-weight: bold; color: #0066cc; }
+              .company-info { text-align: right; font-size: 12px; color: #666; }
+              .doc-title { text-align: center; font-size: 32px; font-weight: bold; color: #333; margin: 20px 0; }
+              .doc-number { text-align: center; font-size: 16px; color: #666; margin-bottom: 30px; }
+              .client-info { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
+              .client-title { font-weight: bold; color: #0066cc; margin-bottom: 10px; }
+              .articles-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              .articles-table th, .articles-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+              .articles-table th { background: #0066cc; color: white; font-weight: bold; }
+              .articles-table .amount { text-align: right; font-weight: bold; }
+              .totals { margin-top: 30px; }
+              .totals-table { width: 400px; margin-left: auto; border-collapse: collapse; }
+              .totals-table td { padding: 8px; border-bottom: 1px solid #ddd; }
+              .totals-table .label { font-weight: bold; }
+              .totals-table .final { background: #0066cc; color: white; font-weight: bold; font-size: 18px; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; text-align: center; }
+              .conditions { margin-top: 20px; font-size: 12px; color: #666; }
+              @media print { body { background: white; } .document { box-shadow: none; } }
+            </style>
+          </head>
+          <body>
+            <div class="document">
+              <div class="header">
+                <div class="logo">
+                  <div style="font-size: 28px; color: #0066cc;">🏭 ECO PUMP AFRIK</div>
+                  <div style="font-size: 14px; color: #666;">Gestion Intelligente</div>
+                </div>
+                <div class="company-info">
+                  <div><strong>ECO PUMP AFRIK</strong></div>
+                  <div>Tél: +225 0748576956 / +225 0707806359</div>
+                  <div>Email: ouanlo.ouattara@ecopumpafrik.com</div>
+                  <div>Cocody - Angré 7e Tranche</div>
+                  <div>www.ecopumpafrik.com</div>
+                </div>
+              </div>
+              
+              <div class="doc-title">${docType}</div>
+              <div class="doc-number">N° ${numero}</div>
+              <div style="text-align: right; margin-bottom: 20px; font-size: 14px;">
+                Date: ${formatDate(document.date_devis || document.date_facture)}
+              </div>
+              
+              <div class="client-info">
+                <div class="client-title">FACTURER À :</div>
+                <div><strong>${document.client_nom}</strong></div>
+                ${document.reference_commande ? `<div>Référence: ${document.reference_commande}</div>` : ''}
+              </div>
+              
+              <table class="articles-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>REF</th>
+                    <th>Désignation</th>
+                    <th>Qté</th>
+                    <th>PU (HT)</th>
+                    <th>TOTAL (HT)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${document.articles.map(article => `
+                    <tr>
+                      <td>${article.item}</td>
+                      <td>${article.ref || ''}</td>
+                      <td>${article.designation}</td>
+                      <td>${article.quantite}</td>
+                      <td class="amount">${formatCurrency(article.prix_unitaire, document.devise)}</td>
+                      <td class="amount">${formatCurrency(article.total, document.devise)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              
+              <div class="totals">
+                <table class="totals-table">
+                  <tr>
+                    <td class="label">SOUS-TOTAL:</td>
+                    <td class="amount">${formatCurrency(document.sous_total, document.devise)}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">TVA (18%):</td>
+                    <td class="amount">${formatCurrency(document.tva, document.devise)}</td>
+                  </tr>
+                  <tr class="final">
+                    <td class="label">TOTAL TTC:</td>
+                    <td class="amount">${formatCurrency(document.total_ttc, document.devise)}</td>
+                  </tr>
+                  <tr class="final">
+                    <td class="label">Net à Payer:</td>
+                    <td class="amount">${formatCurrency(document.net_a_payer, document.devise)}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div class="conditions">
+                <div style="margin-bottom: 10px;"><strong>MODALITÉS :</strong></div>
+                ${document.delai_livraison ? `<div>Délai de livraison: ${document.delai_livraison}</div>` : ''}
+                ${document.conditions_paiement ? `<div>Conditions de paiement: ${document.conditions_paiement}</div>` : ''}
+                ${document.mode_livraison ? `<div>Mode de livraison: ${document.mode_livraison}</div>` : ''}
+                <div style="margin-top: 15px; font-style: italic;">
+                  "Nos commandes se veulent fermes et irrévocables"
+                </div>
+              </div>
+              
+              <div class="footer">
+                <div><strong>SARL au capital de 1 000 000 F CFA</strong></div>
+                <div>Siège social: Cocody - Angré 7e Tranche</div>
+                <div>RCCM: CI-ABJ-2024-B-12345 | N°CC: 2407891H</div>
+                <div>ECOBANK: CI05 CI041 01234567890123456789 01</div>
+                <div>Email: ouanlo.ouattara@ecopumpafrik.com | Site WEB: www.ecopumpafrik.com</div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 20px; padding: 20px;">
+              <button onclick="window.print()" style="background: #0066cc; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px;">
+                🖨️ Imprimer
+              </button>
+              <button onclick="window.close()" style="background: #666; color: white; border: none; padding: 12px 24px; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                Fermer
+              </button>
+            </div>
+          </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // For other document types, show a simple alert
+        alert(`Détails ${type}:\nID: ${document.client_id || document.fournisseur_id || document.article_id}\nNom: ${document.nom || document.designation}\nDate: ${formatDate(document.created_at)}`);
+      }
       
-      alert(`Détails ${docType}:\n\n${JSON.stringify({
-        ID: document.client_id || document.devis_id || document.facture_id || document.fournisseur_id || document.article_id,
-        Nom: document.nom || document.client_nom || document.designation,
-        Montant: document.total_ttc ? formatCurrency(document.total_ttc, document.devise) : 'N/A',
-        Statut: document.statut || document.statut_paiement || 'Actif',
-        Date: document.created_at ? formatDate(document.created_at) : 'N/A'
-      }, null, 2)}`);
     } catch (error) {
       console.error(`Error viewing ${type}:`, error);
       alert(`Erreur lors de la visualisation: ${error.response?.data?.detail || error.message}`);
