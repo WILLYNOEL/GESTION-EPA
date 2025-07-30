@@ -194,6 +194,124 @@ function App() {
     });
   };
 
+  const handleEditClient = (client) => {
+    setClientForm({
+      nom: client.nom,
+      numero_cc: client.numero_cc || '',
+      numero_rc: client.numero_rc || '',
+      nif: client.nif || '',
+      email: client.email || '',
+      telephone: client.telephone || '',
+      adresse: client.adresse || '',
+      devise: client.devise,
+      type_client: client.type_client,
+      conditions_paiement: client.conditions_paiement || ''
+    });
+    setEditingClient(client);
+    setIsClientDialogOpen(true);
+  };
+
+  const handleDeleteClient = async (clientId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+      try {
+        setLoading(true);
+        await axios.delete(`${API_BASE_URL}/api/clients/${clientId}`);
+        fetchAll();
+        alert('Client supprimé avec succès');
+      } catch (error) {
+        console.error('Error deleting client:', error);
+        alert('Erreur lors de la suppression du client: ' + (error.response?.data?.detail || error.message));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleViewDocument = (type, id) => {
+    console.log(`Viewing ${type} document:`, id);
+    // TODO: Implement PDF viewer
+    alert(`Fonctionnalité de visualisation en cours de développement pour ${type}: ${id}`);
+  };
+
+  const handleDownloadDocument = (type, id) => {
+    console.log(`Downloading ${type} document:`, id);
+    // TODO: Implement PDF download
+    alert(`Fonctionnalité de téléchargement PDF en cours de développement pour ${type}: ${id}`);
+  };
+
+  const handleEditDocument = (type, id) => {
+    console.log(`Editing ${type} document:`, id);
+    alert(`Fonctionnalité d'édition en cours de développement pour ${type}: ${id}`);
+  };
+
+  const handleDeleteDocument = async (type, id) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ce ${type} ?`)) {
+      try {
+        setLoading(true);
+        await axios.delete(`${API_BASE_URL}/api/${type}/${id}`);
+        fetchAll();
+        alert(`${type} supprimé avec succès`);
+      } catch (error) {
+        console.error(`Error deleting ${type}:`, error);
+        alert(`Erreur lors de la suppression: ${error.response?.data?.detail || error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleGenerateReport = (reportType) => {
+    console.log('Generating report:', reportType);
+    alert(`Génération du rapport "${reportType}" en cours de développement. Cette fonctionnalité sera disponible prochainement.`);
+  };
+
+  const handleExportPDF = () => {
+    console.log('Exporting to PDF');
+    alert('Fonctionnalité d\'export PDF en cours de développement');
+  };
+
+  const handleExportExcel = () => {
+    console.log('Exporting to Excel');
+    alert('Fonctionnalité d\'export Excel en cours de développement');
+  };
+
+  const handleEditStock = (articleId) => {
+    const article = stock.find(a => a.article_id === articleId);
+    if (article) {
+      setStockForm(article);
+      setIsStockDialogOpen(true);
+    }
+  };
+
+  const handleStockMovement = (articleId) => {
+    console.log('Stock movement for article:', articleId);
+    alert('Fonctionnalité de mouvement de stock en cours de développement');
+  };
+
+  const handleEditFournisseur = (fournisseurId) => {
+    const fournisseur = fournisseurs.find(f => f.fournisseur_id === fournisseurId);
+    if (fournisseur) {
+      setFournisseurForm(fournisseur);
+      setIsFournisseurDialogOpen(true);
+    }
+  };
+
+  const handleDeleteFournisseur = async (fournisseurId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ?')) {
+      try {
+        setLoading(true);
+        await axios.delete(`${API_BASE_URL}/api/fournisseurs/${fournisseurId}`);
+        fetchAll();
+        alert('Fournisseur supprimé avec succès');
+      } catch (error) {
+        console.error('Error deleting fournisseur:', error);
+        alert('Erreur lors de la suppression: ' + (error.response?.data?.detail || error.message));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   // Fournisseur form handlers
   const handleFournisseurSubmit = async (e) => {
     e.preventDefault();
