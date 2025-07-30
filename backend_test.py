@@ -1714,7 +1714,7 @@ def main():
     test_results.append(tester.test_critical_corrections_contact_email())
     
     # Additional critical tests
-    test_results.append(tester.test_missing_stock_endpoint())
+    test_results.append(tester.test_mongodb_stock_update_error_correction())  # Fixed method name
     test_results.append(tester.test_eco_pump_afrik_logo_improvements())
     test_results.append(tester.test_pdf_layout_corrections())
     test_results.append(tester.test_pdf_comments_field())
