@@ -98,6 +98,14 @@ class Devis(BaseModel):
 def generate_client_id():
     return str(uuid.uuid4())
 
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        return super().default(obj)
+
 def generate_devis_number(client_nom: str, date_devis: date):
     """Generate devis number in format DEV/CLIENT/DDMMYYYY/NNN"""
     date_str = date_devis.strftime("%d%m%Y")
