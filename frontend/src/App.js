@@ -1619,12 +1619,28 @@ ECO PUMP AFRIK - Tous droits réservés`;
                         />
                       </div>
                       <div>
-                        <Label htmlFor="mode_livraison">Mode de livraison</Label>
-                        <Input
-                          id="mode_livraison"
-                          value={devisForm.mode_livraison}
-                          onChange={(e) => setDevisForm({ ...devisForm, mode_livraison: e.target.value })}
-                          placeholder="Ex: Franco domicile"
+                        <Label htmlFor="devis_mode_livraison">Mode de livraison</Label>
+                        <Select value={devisForm.mode_livraison} onValueChange={(value) => setDevisForm({ ...devisForm, mode_livraison: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner le mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ex-works">Ex-Works (départ usine)</SelectItem>
+                            <SelectItem value="livraison-incluse">Livraison incluse</SelectItem>
+                            <SelectItem value="franco-domicile">Franco domicile</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="col-span-2">
+                        <Label htmlFor="devis_commentaires">Commentaires/Notes</Label>
+                        <textarea
+                          id="devis_commentaires"
+                          className="w-full p-2 border border-gray-300 rounded-md resize-vertical"
+                          rows="3"
+                          value={devisForm.commentaires || ''}
+                          onChange={(e) => setDevisForm({ ...devisForm, commentaires: e.target.value })}
+                          placeholder="Informations complémentaires, instructions spéciales, notes internes..."
                         />
                       </div>
                     </div>
