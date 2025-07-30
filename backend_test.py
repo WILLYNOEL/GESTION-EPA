@@ -401,7 +401,8 @@ class EcoPumpAfrikAPITester:
                 "Generate Devis PDF",
                 "GET",
                 f"api/pdf/document/devis/{self.created_devis_id}",
-                200
+                200,
+                expect_pdf=True
             )
             if not success:
                 return False
@@ -441,7 +442,8 @@ class EcoPumpAfrikAPITester:
                 f"Generate {report_type.replace('_', ' ').title()} Report PDF",
                 "GET",
                 f"api/pdf/rapport/{report_type}",
-                200
+                200,
+                expect_pdf=True
             )
             if not success:
                 return False
