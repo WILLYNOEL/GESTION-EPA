@@ -191,18 +191,87 @@ function App() {
     fetchAll();
   }, []);
 
-  // Search function
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      setSearchResults({});
-      return;
-    }
-    
+  // Advanced search functions for each entity type
+  const handleAdvancedSearch = async (entityType, filters) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchResults(response.data.results || {});
+      setLoading(true);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      Object.keys(filters).forEach(key => {
+        if (filters[key] && filters[key] !== '') {
+          params.append(key, filters[key]);
+        }
+      });
+      
+      const response = await axios.get(`${API_BASE_URL}/api/search/${entityType}?${params.toString()}`);
+      
+      if (response.data.success) {
+        // Update the respective data array with filtered results
+        switch (entityType) {
+          case 'devis':
+            setDevis(response.data.devis);
+            break;
+          case 'factures':
+            setFactures(response.data.factures);
+            break;
+          case 'clients':
+            setClients(response.data.clients);
+            break;
+          case 'stock':
+            setStock(response.data.stock);
+            break;
+        }
+        
+        alert(`🔍 ${response.data.count} résultat(s) trouvé(s) pour ${entityType}`);
+      }
     } catch (error) {
-      console.error('Error searching:', error);
+      console.error(`Error searching ${entityType}:`, error);
+      alert(`❌ Erreur lors de la recherche: ${error.response?.data?.detail || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Reset filters and reload data
+  const handleResetFilters = async (entityType) => {
+    try {
+      setLoading(true);
+      
+      // Reset filter states
+      switch (entityType) {
+        case 'devis':
+          setDevisFilters({
+            client_nom: '', numero_devis: '', date_debut: '', date_fin: '', devise: '', statut: ''
+          });
+          await fetchDevis();
+          break;
+        case 'factures':
+          setFacturesFilters({
+            client_nom: '', numero_facture: '', date_debut: '', date_fin: '', 
+            statut_paiement: '', devise: '', montant_min: '', montant_max: ''
+          });
+          await fetchFactures();
+          break;
+        case 'clients':
+          setClientsFilters({
+            nom: '', type_client: '', devise: '', ville: ''
+          });
+          await fetchClients();
+          break;
+        case 'stock':
+          setStockFilters({
+            designation: '', ref: '', stock_bas: false, fournisseur: ''
+          });
+          await fetchStock();
+          break;
+      }
+      
+      alert(`✅ Filtres remis à zéro pour ${entityType}`);
+    } catch (error) {
+      console.error(`Error resetting filters for ${entityType}:`, error);
+    } finally {
+      setLoading(false);
     }
   };
 
