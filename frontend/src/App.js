@@ -1686,6 +1686,9 @@ ECO PUMP AFRIK - Tous droits réservés`;
                         <div>
                           <p className="font-medium text-sm">{f.numero_facture}</p>
                           <p className="text-xs text-muted-foreground">{f.client_nom}</p>
+                          <p className="text-xs text-purple-600 font-medium">
+                            📅 {f.created_at_formatted || formatDate(f.created_at)}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium">{formatCurrency(f.total_ttc, f.devise)}</p>
