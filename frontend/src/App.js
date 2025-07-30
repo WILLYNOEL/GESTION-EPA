@@ -157,6 +157,16 @@ function App() {
   const [isStockDialogOpen, setIsStockDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
 
+  // Display mode states - intelligent loading (don't show all data immediately)
+  const [showClientsData, setShowClientsData] = useState(false);
+  const [showFournisseursData, setShowFournisseursData] = useState(false);
+  const [showDevisData, setShowDevisData] = useState(false);
+  const [showFacturesData, setShowFacturesData] = useState(false);
+  const [clientsSearch, setClientsSearch] = useState('');
+  const [fournisseursSearch, setFournisseursSearch] = useState('');
+  const [devisSearch, setDevisSearch] = useState('');
+  const [facturesSearch, setFacturesSearch] = useState('');
+
   // Fetch data functions
   const fetchAll = async () => {
     try {
