@@ -2023,7 +2023,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
                         <SelectValue placeholder="Tous statuts" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Tous statuts</SelectItem>
+                        <SelectItem value="tous">Tous statuts</SelectItem>
                         <SelectItem value="en_attente">En attente</SelectItem>
                         <SelectItem value="accepte">Accepté</SelectItem>
                         <SelectItem value="refuse">Refusé</SelectItem>
