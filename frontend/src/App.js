@@ -3773,6 +3773,7 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 </div>
               </CardContent>
             </Card>
+            */}
             
             {/* New Section: Specialized Lists */}
             <div className="mt-8">
