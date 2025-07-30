@@ -111,11 +111,14 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
         - agent: "main"
         - comment: "CORRIGÉ: Nouveaux endpoints PDF ajoutés - /api/pdf/document/{type}/{id} pour tous les documents avec génération PDF professionnelle via reportlab"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTÉ ET VALIDÉ: Endpoints PDF documents fonctionnent parfaitement. Tests réussis pour devis (3371 bytes), facture (3372 bytes), paiement (2393 bytes). Content-type application/pdf correct. Gestion d'erreurs validée (400 pour type invalide, 404 pour document inexistant). Branding ECO PUMP AFRIK intégré."
 
   - task: "Génération PDF rapports professionnels"
     implemented: true
@@ -123,11 +126,14 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
         - agent: "main"
         - comment: "IMPLÉMENTÉ: Endpoints /api/pdf/rapport/{type} créés avec support journal_ventes, balance_clients, tresorerie, compte_resultat. PDFs avec branding ECO PUMP AFRIK, tableaux professionnels, styles corporate."
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTÉ ET VALIDÉ: Tous les rapports PDF fonctionnent parfaitement. Journal des ventes (3346 bytes), Balance clients (3326 bytes), Trésorerie (2555 bytes), Compte de résultat (2629 bytes). Génération professionnelle avec données réelles, tableaux formatés, branding ECO PUMP AFRIK complet."
 
 frontend:
   - task: "Boutons d'action documents - interface"
