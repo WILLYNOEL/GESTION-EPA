@@ -2608,10 +2608,10 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
 
           {/* Fournisseurs Tab - Complete Implementation */}
-          <TabsContent value="fournisseurs" className="space-y-6">
+          {hasPermission('fournisseurs') && (
+            <TabsContent value="fournisseurs" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Gestion des Fournisseurs</h2>
               <Dialog open={isFournisseurDialogOpen} onOpenChange={setIsFournisseurDialogOpen}>
