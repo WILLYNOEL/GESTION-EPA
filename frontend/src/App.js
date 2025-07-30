@@ -3653,40 +3653,100 @@ ECO PUMP AFRIK - Tous droits réservés`;
                 
                 <div>
                   <Label htmlFor="global_paiement_document" className="text-sm font-medium">Document à payer *</Label>
-                  <Select value={paiementForm.document_id} onValueChange={(value) => {
-                    setPaiementForm({ ...paiementForm, document_id: value });
-                    if (paiementForm.type_document === 'facture') {
-                      const facture = factures.find(f => f.facture_id === value);
-                      if (facture) {
-                        setPaiementForm({
-                          ...paiementForm,
-                          document_id: value,
-                          client_id: facture.client_id,
-                          devise: facture.devise,
-                          montant: facture.total_ttc - (facture.montant_paye || 0)
-                        });
-                      }
-                    }
-                  }}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Sélectionner un document à payer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paiementForm.type_document === 'facture' ? (
-                        factures.filter(f => f.statut_paiement !== 'payé').map((facture) => (
-                          <SelectItem key={facture.facture_id} value={facture.facture_id}>
-                            <div className="flex justify-between w-full">
-                              <span className="font-mono text-sm">{facture.numero_facture}</span>
-                              <span className="text-gray-600">{facture.client_nom}</span>
-                              <span className="font-bold text-red-600">{formatCurrency(facture.total_ttc - (facture.montant_paye || 0), facture.devise)}</span>
+                  <div className="space-y-2">
+                    {/* Champ de recherche intelligent */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Tapez le numéro de facture ou nom du client..."
+                        value={documentSearch}
+                        onChange={(e) => setDocumentSearch(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    
+                    {/* Liste des documents filtrés */}
+                    {(documentSearch.trim() || !paiementForm.document_id) && (
+                      <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-md bg-white">
+                        {getFilteredDocuments().length === 0 ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <FileText className="mx-auto h-8 w-8 mb-2" />
+                            <p>Aucune facture trouvée</p>
+                            <p className="text-sm">Essayez une recherche différente</p>
+                          </div>
+                        ) : (
+                          getFilteredDocuments().map((facture) => (
+                            <div
+                              key={facture.facture_id}
+                              className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors ${
+                                paiementForm.document_id === facture.facture_id ? 'bg-blue-100 border-blue-200' : ''
+                              }`}
+                              onClick={() => {
+                                setPaiementForm({
+                                  ...paiementForm,
+                                  document_id: facture.facture_id,
+                                  client_id: facture.client_id,
+                                  devise: facture.devise,
+                                  montant: facture.total_ttc - (facture.montant_paye || 0)
+                                });
+                                setDocumentSearch(''); // Effacer la recherche après sélection
+                              }}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="font-mono text-sm font-medium text-blue-600">
+                                    {facture.numero_facture}
+                                  </p>
+                                  <p className="text-sm text-gray-600">{facture.client_nom}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-red-600">
+                                    {formatCurrency(facture.total_ttc - (facture.montant_paye || 0), facture.devise)}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Total: {formatCurrency(facture.total_ttc, facture.devise)}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="none">Aucun bon de commande disponible</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Document sélectionné */}
+                    {paiementForm.document_id && !documentSearch.trim() && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-mono text-sm font-medium text-green-700">
+                              ✅ {factures.find(f => f.facture_id === paiementForm.document_id)?.numero_facture}
+                            </p>
+                            <p className="text-sm text-green-600">
+                              {factures.find(f => f.facture_id === paiementForm.document_id)?.client_nom}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-green-700">
+                              {formatCurrency(paiementForm.montant, paiementForm.devise)}
+                            </p>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setPaiementForm({ ...paiementForm, document_id: '', client_id: '', montant: 0 });
+                                setDocumentSearch('');
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              Changer
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
