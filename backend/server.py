@@ -216,6 +216,89 @@ class Paiement(BaseModel):
     statut: str = "validé"
     created_at: str = None
 
+# Modèles d'authentification
+class User(BaseModel):
+    user_id: str = None
+    username: str
+    password: str
+    email: Optional[EmailStr] = None
+    role: str = "user"  # admin, user
+    is_active: bool = True
+    created_at: str = None
+    last_login: str = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    email: Optional[EmailStr] = None
+    role: str = "user"
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_info: dict
+
+# Configuration JWT
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY', secrets.token_hex(32))
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 heures
+
+# Security
+security = HTTPBearer()
+
+def hash_password(password: str) -> str:
+    """Hash a password using SHA256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return hash_password(plain_password) == hashed_password
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """Create a JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token and return user info"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token invalide",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Vérifier que l'utilisateur existe toujours
+        user = users_collection.find_one({"username": username})
+        if not user or not user.get("is_active", False):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Utilisateur inactif ou inexistant",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        return user
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalide",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
 def get_logo_image():
     """Load the ECO PUMP AFRIK logo for PDFs"""
     try:
