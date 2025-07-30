@@ -231,11 +231,11 @@ async def create_devis(devis: Devis):
         
         devis_data = devis.dict()
         devis_data["devis_id"] = str(uuid.uuid4())
-        devis_data["date_devis"] = date.today()
+        devis_data["date_devis"] = date.today().isoformat()
         devis_data["numero_devis"] = generate_devis_number(devis.client_nom, date.today())
         devis_data["devise"] = client["devise"]
-        devis_data["created_at"] = datetime.now()
-        devis_data["updated_at"] = datetime.now()
+        devis_data["created_at"] = datetime.now().isoformat()
+        devis_data["updated_at"] = datetime.now().isoformat()
         
         result = devis_collection.insert_one(devis_data)
         
