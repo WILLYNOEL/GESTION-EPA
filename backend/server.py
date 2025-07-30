@@ -305,8 +305,8 @@ def get_logo_image():
         logo_path = "/app/logo_eco_pump.png"
         if os.path.exists(logo_path):
             from reportlab.platypus import Image as ReportLabImage
-            # Create a larger version for PDF (increased from 50x50 to 80x80)
-            logo_img = ReportLabImage(logo_path, width=80, height=80)
+            # TAILLE AUGMENTÉE : 120x120 pixels (au lieu de 80x80)
+            logo_img = ReportLabImage(logo_path, width=120, height=120)
             return logo_img
         else:
             logger.warning("Logo file not found, using text-based branding")
