@@ -1487,44 +1487,8 @@ async def generate_report_pdf(report_type: str, date_debut: str = None, date_fin
             story = []
             styles = getSampleStyleSheet()
             
-            # Create PROFESSIONAL ECO PUMP AFRIK logo for reports (same as documents)
-            logo_table_data = [
-                ["", "ECO PUMP AFRIK", ""],
-                ["", "Solutions Hydrauliques Professionnelles", ""]
-            ]
-            
-            logo_table = Table(logo_table_data, colWidths=[80, 360, 80])
-            logo_table.setStyle(TableStyle([
-                # Logo cell styling (left)
-                ('BACKGROUND', (0, 0), (0, 1), colors.HexColor('#0066cc')),  # Blue background like logo
-                ('ALIGN', (0, 0), (0, 1), 'CENTER'),
-                ('VALIGN', (0, 0), (0, 1), 'MIDDLE'),
-                
-                # Company name styling (center)
-                ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (1, 0), (1, 0), 36),  # Larger company name for reports
-                ('TEXTCOLOR', (1, 0), (1, 0), colors.HexColor('#000000')),  # Black like logo
-                ('ALIGN', (1, 0), (1, 0), 'CENTER'),
-                ('VALIGN', (1, 0), (1, 0), 'MIDDLE'),
-                
-                # Subtitle styling
-                ('FONTNAME', (1, 1), (1, 1), 'Helvetica'),
-                ('FONTSIZE', (1, 1), (1, 1), 18),
-                ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor('#0066cc')),  # Blue like logo
-                ('ALIGN', (1, 1), (1, 1), 'CENTER'),
-                ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),
-                
-                # Right cell styling
-                ('BACKGROUND', (2, 0), (2, 1), colors.HexColor('#f0f8ff')),
-                
-                # Overall table styling
-                ('BOX', (0, 0), (-1, -1), 3, colors.HexColor('#0066cc')),  # Thick blue border
-                ('TOPPADDING', (0, 0), (-1, -1), 15),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
-                ('LEFTPADDING', (0, 0), (-1, -1), 10),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
-            ]))
-            
+            # Professional logo header with actual logo
+            logo_table = create_pdf_header_with_logo()
             story.append(logo_table)
             story.append(Spacer(1, 10))
             
