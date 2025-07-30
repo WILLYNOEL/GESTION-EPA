@@ -511,12 +511,21 @@ async def create_facture(facture: Facture):
             raise HTTPException(status_code=404, detail="Client non trouvé")
         
         facture_data = facture.dict()
+        current_time = datetime.now()
+        
+        # Generate facture ID and number
         facture_data["facture_id"] = generate_id()
-        facture_data["date_facture"] = date.today().isoformat()
         facture_data["numero_facture"] = generate_numero("FACT", facture.client_nom, date.today())
+        facture_data["date_facture"] = date.today().isoformat()
+        facture_data["created_at"] = current_time.isoformat()
+        facture_data["created_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
+        facture_data["updated_at"] = current_time.isoformat()
+        facture_data["updated_at_formatted"] = current_time.strftime("%d/%m/%Y à %H:%M:%S")
         facture_data["devise"] = client["devise"]
-        facture_data["created_at"] = datetime.now().isoformat()
-        facture_data["updated_at"] = datetime.now().isoformat()
+        
+        # Set default payment status
+        facture_data["statut_paiement"] = "impayé"
+        facture_data["montant_paye"] = 0.0
         
         result = factures_collection.insert_one(facture_data)
         
