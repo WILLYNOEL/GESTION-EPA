@@ -167,6 +167,74 @@ function App() {
   const [devisSearch, setDevisSearch] = useState('');
   const [facturesSearch, setFacturesSearch] = useState('');
 
+  // Search functions for intelligent loading
+  const handleClientsSearch = () => {
+    if (clientsSearch.trim() === '') {
+      setShowClientsData(true); // Show all if empty search
+    } else {
+      // Filter clients based on search term
+      setShowClientsData(true);
+    }
+  };
+
+  const handleFournisseursSearch = () => {
+    if (fournisseursSearch.trim() === '') {
+      setShowFournisseursData(true);
+    } else {
+      setShowFournisseursData(true);
+    }
+  };
+
+  const handleDevisSearch = () => {
+    if (devisSearch.trim() === '') {
+      setShowDevisData(true);
+    } else {
+      setShowDevisData(true);
+    }
+  };
+
+  const handleFacturesSearch = () => {
+    if (facturesSearch.trim() === '') {
+      setShowFacturesData(true);
+    } else {
+      setShowFacturesData(true);
+    }
+  };
+
+  // Filtered data based on search terms
+  const getFilteredClients = () => {
+    if (!clientsSearch.trim()) return clients;
+    return clients.filter(client => 
+      client.nom.toLowerCase().includes(clientsSearch.toLowerCase()) ||
+      (client.email && client.email.toLowerCase().includes(clientsSearch.toLowerCase())) ||
+      (client.telephone && client.telephone.includes(clientsSearch))
+    );
+  };
+
+  const getFilteredFournisseurs = () => {
+    if (!fournisseursSearch.trim()) return fournisseurs;
+    return fournisseurs.filter(fournisseur => 
+      fournisseur.nom.toLowerCase().includes(fournisseursSearch.toLowerCase()) ||
+      (fournisseur.email && fournisseur.email.toLowerCase().includes(fournisseursSearch.toLowerCase()))
+    );
+  };
+
+  const getFilteredDevis = () => {
+    if (!devisSearch.trim()) return devis;
+    return devis.filter(d => 
+      d.numero_devis.toLowerCase().includes(devisSearch.toLowerCase()) ||
+      d.client_nom.toLowerCase().includes(devisSearch.toLowerCase())
+    );
+  };
+
+  const getFilteredFactures = () => {
+    if (!facturesSearch.trim()) return factures;
+    return factures.filter(f => 
+      f.numero_facture.toLowerCase().includes(facturesSearch.toLowerCase()) ||
+      f.client_nom.toLowerCase().includes(facturesSearch.toLowerCase())
+    );
+  };
+
   // Fetch data functions
   const fetchAll = async () => {
     try {
