@@ -3698,7 +3698,9 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </Card>
             </div>
 
-            {/* Filtres et options de période */}
+            {/* 
+            SECTION COMMENTÉE PAR DEMANDE DE L'UTILISATEUR - Options de génération not needed
+            {/* Filtres et options de période *}
             <Card>
               <CardHeader>
                 <CardTitle>Options de Génération</CardTitle>
