@@ -101,3 +101,76 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Résoudre les erreurs critiques de notifications rouge sur les boutons d'action des factures et devis, et implémenter une génération robuste de rapports PDF professionnels avec logo ECO PUMP AFRIK pour remplacer les fichiers Excel mal structurés actuels."
+
+backend:
+  - task: "Boutons d'action documents - endpoints API"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "Erreurs 'Not Found' sur les boutons de visualisation des devis/factures. Endpoints GET /api/devis/{id} et /api/factures/{id} potentiellement défaillants."
+
+  - task: "Génération PDF rapports professionnels"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "Aucun endpoint PDF côté backend. Import reportlab présent mais non utilisé. Besoin d'endpoints /api/pdf/rapport/{type} et /api/pdf/document/{type}/{id}"
+
+frontend:
+  - task: "Boutons d'action documents - interface"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "Fonction handleViewDocument (ligne 230) génère erreurs. Appels API vers endpoints inexistants ou malformés."
+
+  - task: "Rapports professionnels PDF frontend"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 2
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "handleGenerateReport génère HTML dans popup, pas PDF. handleDownloadDocument génère .txt, pas PDF. Besoin intégration avec endpoints PDF backend."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Réparer endpoints API documents backend"
+    - "Créer vrais endpoints PDF avec reportlab"
+    - "Corriger boutons d'action frontend"
+    - "Intégrer génération PDF professionnelle"
+  stuck_tasks:
+    - "Rapports professionnels PDF frontend"
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+    - message: "Analyse terminée. Problèmes identifiés: (1) Boutons d'action avec erreurs 'Not Found' dues à endpoints API défaillants, (2) Rapports non-PDF (HTML/TXT) au lieu de vrais PDFs professionnels. Prêt à implémenter corrections complètes."
