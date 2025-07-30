@@ -162,10 +162,12 @@ function App() {
   const [showFournisseursData, setShowFournisseursData] = useState(false);
   const [showDevisData, setShowDevisData] = useState(false);
   const [showFacturesData, setShowFacturesData] = useState(false);
+  const [showPaiementsData, setShowPaiementsData] = useState(false);
   const [clientsSearch, setClientsSearch] = useState('');
   const [fournisseursSearch, setFournisseursSearch] = useState('');
   const [devisSearch, setDevisSearch] = useState('');
   const [facturesSearch, setFacturesSearch] = useState('');
+  const [paiementsSearch, setPaiementsSearch] = useState('');
 
   // Search functions for intelligent loading
   const handleClientsSearch = () => {
