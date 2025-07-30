@@ -2331,64 +2331,126 @@ ECO PUMP AFRIK - Tous droits réservés`;
               </CardContent>
             </Card>
 
+            {/* Interface de Recherche Intelligente pour Devis */}
             <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Numéro</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {devis.map((d) => (
-                      <TableRow key={d.devis_id}>
-                        <TableCell className="font-medium">{d.numero_devis}</TableCell>
-                        <TableCell>{d.client_nom}</TableCell>
-                        <TableCell>{formatDate(d.date_devis)}</TableCell>
-                        <TableCell className="font-medium">{formatCurrency(d.total_ttc, d.devise)}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatutBadge(d.statut)}>{d.statut}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewDocument('devis', d.devis_id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {d.statut !== 'converti' && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => convertDevisToFacture(d.devis_id)}
-                                disabled={loading}
-                              >
-                                <ArrowRightLeft className="h-4 w-4 mr-1" />
-                                Facture
-                              </Button>
-                            )}
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDownloadDocument('devis', d.devis_id)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Search className="mr-2 h-5 w-5" />
+                  Recherche de Devis Intelligente
+                </CardTitle>
+                <CardDescription>
+                  Recherchez par numéro de devis ou nom de client
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Tapez le numéro de devis ou nom du client..."
+                    value={devisSearch}
+                    onChange={(e) => setDevisSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleDevisSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Rechercher
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setDevisSearch('');
+                      setShowDevisData(true);
+                    }}
+                  >
+                    Voir Tout ({devis.length})
+                  </Button>
+                  {showDevisData && (
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowDevisData(false)}
+                    >
+                      Masquer Tout
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
+
+            {/* Affichage des Résultats Devis */}
+            {showDevisData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Résultats ({getFilteredDevis().length} devis)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Numéro</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getFilteredDevis().length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                            <FileCheck className="mx-auto h-12 w-12 mb-2" />
+                            <p>Aucun devis trouvé</p>
+                            <p className="text-sm">Essayez une recherche différente</p>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        getFilteredDevis().map((d) => (
+                          <TableRow key={d.devis_id}>
+                            <TableCell className="font-medium">{d.numero_devis}</TableCell>
+                            <TableCell>{d.client_nom}</TableCell>
+                            <TableCell>{formatDate(d.date_devis)}</TableCell>
+                            <TableCell className="font-medium">{formatCurrency(d.total_ttc, d.devise)}</TableCell>
+                            <TableCell>
+                              <Badge variant={getStatutBadge(d.statut)}>{d.statut}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewDocument('devis', d.devis_id)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {d.statut !== 'converti' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => convertDevisToFacture(d.devis_id)}
+                                    disabled={loading}
+                                  >
+                                    <ArrowRightLeft className="h-4 w-4 mr-1" />
+                                    Facture
+                                  </Button>
+                                )}
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleDownloadDocument('devis', d.devis_id)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Fournisseurs Tab - Complete Implementation */}
