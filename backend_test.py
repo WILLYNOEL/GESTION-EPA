@@ -4,7 +4,7 @@ import json
 from datetime import datetime, date
 
 class EcoPumpAfrikAPITester:
-    def __init__(self, base_url="https://b49fd2cf-a326-4c6a-9c5a-4106c64f2b2b.preview.emergentagent.com"):
+    def __init__(self, base_url="https://4b33f187-d246-4fb0-9666-69f078e7f34c.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
