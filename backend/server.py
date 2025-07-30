@@ -64,6 +64,20 @@ try:
         # Mot de passe par défaut : admin123
         default_password = "admin123"
         hashed_password = hashlib.sha256(default_password.encode()).hexdigest()
+        
+        # Permissions complètes pour l'admin
+        admin_permissions = {
+            "dashboard": True,
+            "clients": True,
+            "fournisseurs": True,
+            "devis": True,
+            "factures": True,
+            "stock": True,
+            "paiements": True,
+            "rapports": True,
+            "administration": True
+        }
+        
         users_collection.insert_one({
             "user_id": str(uuid.uuid4()),
             "username": "admin",
@@ -71,10 +85,11 @@ try:
             "email": "admin@ecopumpafrik.com",
             "role": "admin",
             "is_active": True,
+            "permissions": admin_permissions,
             "created_at": datetime.now(),
             "last_login": None
         })
-        logger.info("Utilisateur admin par défaut créé (admin/admin123)")
+        logger.info("Utilisateur admin par défaut créé avec toutes les permissions (admin/admin123)")
     
     logger.info(f"Connected to MongoDB: {MONGO_URL}/{DB_NAME}")
 except Exception as e:
