@@ -899,47 +899,65 @@ ECO PUMP AFRIK - Tous droits réservés`;
     return [...fournisseurs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' }));
   };
 
-  const handleStockMovementSubmit = async (e) => {
-    e.preventDefault();
-    
+  // Generate specialized lists with period filters  
+  const handleGenerateList = async (listType) => {
     try {
       setLoading(true);
-      const { article, movement, type, reason } = stockMovementDialog;
       
-      if (!movement || isNaN(movement) || parseFloat(movement) <= 0) {
-        alert('Veuillez saisir une quantité valide');
-        return;
+      // Build API URL with date filters
+      let apiUrl = `${API_BASE_URL}/api/pdf/liste/${listType}`;
+      
+      // Add date filters if they are set
+      const queryParams = [];
+      if (rapportFilters.date_debut) {
+        queryParams.push(`date_debut=${rapportFilters.date_debut}`);
+      }
+      if (rapportFilters.date_fin) {
+        queryParams.push(`date_fin=${rapportFilters.date_fin}`);
       }
       
-      const movementQuantity = parseFloat(movement);
-      const newQuantity = type === 'in' ? 
-        parseFloat(article.quantite_stock) + movementQuantity :
-        parseFloat(article.quantite_stock) - movementQuantity;
-      
-      if (newQuantity < 0) {
-        alert('❌ Impossible: Stock ne peut pas être négatif');
-        return;
+      if (queryParams.length > 0) {
+        apiUrl += '?' + queryParams.join('&');
       }
       
-      // Update stock quantity
-      await axios.put(`${API_BASE_URL}/api/stock/${article.article_id}`, {
-        quantite_stock: newQuantity
-      });
+      const response = await fetch(apiUrl);
       
-      await fetchAll();
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      }
       
-      const operationType = type === 'in' ? 'Entrée' : 'Sortie';
-      const alertMsg = newQuantity <= article.stock_minimum ? 
-        `⚠️ ALERTE: ${operationType} enregistrée ! Nouveau stock: ${newQuantity} (En dessous du minimum: ${article.stock_minimum})` :
-        `✅ ${operationType} enregistrée avec succès ! Nouveau stock: ${newQuantity}`;
+      // Create blob from PDF response
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       
-      alert(alertMsg + `\nMotif: ${reason || 'Non spécifié'}`);
+      // Open PDF in new window
+      const newWindow = window.open(url, '_blank', 'width=900,height=1200,scrollbars=yes');
       
-      // Close dialog
-      setStockMovementDialog({ open: false, article: null, movement: '', reason: '', type: 'in' });
+      if (!newWindow) {
+        // Fallback: download if popup blocked
+        const link = document.createElement('a');
+        link.href = url;
+        const period = rapportFilters.date_debut && rapportFilters.date_fin ? 
+          `_${rapportFilters.date_debut}_${rapportFilters.date_fin}` : '';
+        link.download = `ECO_PUMP_AFRIK_${listType}${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+        alert('✅ Liste PDF téléchargée (popup bloqué)');
+      } else {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(url);
+        };
+        
+        const periodText = rapportFilters.date_debut && rapportFilters.date_fin ? 
+          `\n📅 Période: ${rapportFilters.date_debut} au ${rapportFilters.date_fin}` : 
+          '\n📅 Toutes les dates';
+        
+        alert(`✅ Liste "${listType.replace('-', ' ')}" générée avec succès !${periodText}\n🎨 PDF professionnel avec logo ECO PUMP AFRIK`);
+      }
+      
     } catch (error) {
-      console.error('Error updating stock:', error);
-      alert(`❌ Erreur lors de la mise à jour du stock: ${error.response?.data?.detail || error.message}`);
+      console.error('Error generating list:', error);
+      alert(`❌ Erreur lors de la génération de la liste: ${error.message}`);
     } finally {
       setLoading(false);
     }
