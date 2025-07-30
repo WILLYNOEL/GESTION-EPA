@@ -244,26 +244,26 @@ function App() {
           setDevisFilters({
             client_nom: '', numero_devis: '', date_debut: '', date_fin: '', devise: '', statut: ''
           });
-          await fetchDevis();
+          await fetchAll();
           break;
         case 'factures':
           setFacturesFilters({
             client_nom: '', numero_facture: '', date_debut: '', date_fin: '', 
             statut_paiement: '', devise: '', montant_min: '', montant_max: ''
           });
-          await fetchFactures();
+          await fetchAll();
           break;
         case 'clients':
           setClientsFilters({
             nom: '', type_client: '', devise: '', ville: ''
           });
-          await fetchClients();
+          await fetchAll();
           break;
         case 'stock':
           setStockFilters({
             designation: '', ref: '', stock_bas: false, fournisseur: ''
           });
-          await fetchStock();
+          await fetchAll();
           break;
       }
       
