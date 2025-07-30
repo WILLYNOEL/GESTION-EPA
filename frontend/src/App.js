@@ -231,7 +231,188 @@ function App() {
     try {
       setLoading(true);
       
-      // Use the new PDF endpoint for document visualization
+      // Special handling for stock items - display info modal instead of PDF
+      if (type === 'stock') {
+        const article = stock.find(a => a.article_id === id);
+        if (!article) {
+          alert('❌ Article non trouvé');
+          return;
+        }
+        
+        // Create info window for stock item
+        const infoWindow = window.open('', '_blank', 'width=600,height=700,scrollbars=yes');
+        
+        const stockHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>ECO PUMP AFRIK - Fiche Article</title>
+            <meta charset="UTF-8">
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                background: #f8f9fa; 
+                color: #333; 
+                line-height: 1.6;
+                padding: 30px;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+              }
+              .header {
+                text-align: center;
+                padding-bottom: 30px;
+                border-bottom: 3px solid #0066cc;
+                margin-bottom: 40px;
+              }
+              .header h1 {
+                font-size: 28px;
+                color: #0066cc;
+                font-weight: bold;
+                margin-bottom: 10px;
+              }
+              .header .subtitle {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 20px;
+              }
+              .doc-title {
+                font-size: 22px;
+                color: #333;
+                font-weight: bold;
+                margin-bottom: 30px;
+                text-align: center;
+              }
+              .info-section {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                border-left: 4px solid #0066cc;
+              }
+              .info-section h3 {
+                color: #0066cc;
+                margin-bottom: 15px;
+                font-size: 16px;
+              }
+              .info-section p {
+                margin-bottom: 8px;
+                font-size: 14px;
+              }
+              .stock-status {
+                padding: 10px;
+                border-radius: 8px;
+                text-align: center;
+                font-weight: bold;
+                margin: 20px 0;
+              }
+              .stock-ok { background: #d4edda; color: #155724; }
+              .stock-low { background: #fff3cd; color: #856404; }
+              .stock-alert { background: #f8d7da; color: #721c24; }
+              .actions {
+                text-align: center;
+                margin-top: 30px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 8px;
+              }
+              .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 0 10px;
+                border: none;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+              }
+              .btn-primary {
+                background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+                color: white;
+                box-shadow: 0 5px 15px rgba(0,102,204,0.4);
+              }
+              .btn-secondary {
+                background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                color: white;
+                box-shadow: 0 5px 15px rgba(108,117,125,0.4);
+              }
+              .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🏭 ECO PUMP AFRIK</h1>
+                <div class="subtitle">Gestion Intelligente</div>
+              </div>
+              
+              <div class="doc-title">📦 FICHE ARTICLE</div>
+              
+              <div class="info-section">
+                <h3>🔍 INFORMATIONS GÉNÉRALES</h3>
+                <p><strong>Référence:</strong> ${article.ref}</p>
+                <p><strong>Désignation:</strong> ${article.designation}</p>
+                <p><strong>Emplacement:</strong> ${article.emplacement || 'Non défini'}</p>
+                <p><strong>Fournisseur principal:</strong> ${article.fournisseur_principal || 'Non défini'}</p>
+              </div>
+              
+              <div class="info-section">
+                <h3>📊 STOCK & PRIX</h3>
+                <p><strong>Stock actuel:</strong> ${article.quantite_stock}</p>
+                <p><strong>Stock minimum:</strong> ${article.stock_minimum}</p>
+                <p><strong>Prix d'achat moyen:</strong> ${formatCurrency(article.prix_achat_moyen)}</p>
+                <p><strong>Prix de vente:</strong> ${formatCurrency(article.prix_vente)}</p>
+              </div>
+              
+              <div class="stock-status ${article.quantite_stock <= article.stock_minimum ? 
+                (article.quantite_stock === 0 ? 'stock-alert' : 'stock-low') : 'stock-ok'}">
+                ${article.quantite_stock <= article.stock_minimum ? 
+                  (article.quantite_stock === 0 ? '⚠️ STOCK ÉPUISÉ' : '🔶 STOCK BAS') : 
+                  '✅ STOCK OPTIMAL'}
+              </div>
+              
+              <div class="info-section">
+                <h3>📅 INFORMATIONS SYSTÈME</h3>
+                <p><strong>Date de création:</strong> ${formatDate(article.created_at)}</p>
+                <p><strong>Dernière mise à jour:</strong> ${formatDate(article.updated_at)}</p>
+                <p><strong>ID Article:</strong> ${article.article_id}</p>
+              </div>
+              
+              <div class="actions">
+                <button onclick="window.print()" class="btn btn-primary">
+                  🖨️ Imprimer
+                </button>
+                <button onclick="window.close()" class="btn btn-secondary">
+                  ✖️ Fermer
+                </button>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+        
+        infoWindow.document.write(stockHtml);
+        infoWindow.document.close();
+        
+        setTimeout(() => {
+          alert('✅ Fiche article affichée avec succès !');
+        }, 500);
+        
+        return;
+      }
+      
+      // Use the new PDF endpoint for document visualization (devis, facture, paiement)
       const response = await fetch(`${API_BASE_URL}/api/pdf/document/${type}/${id}`);
       
       if (!response.ok) {
