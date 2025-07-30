@@ -405,6 +405,16 @@ def main():
     test_results.append(tester.test_delete_client_with_devis())
     test_results.append(tester.test_currency_handling())
     
+    # Additional comprehensive tests
+    test_results.append(tester.test_convert_devis_to_facture())
+    test_results.append(tester.test_get_factures())
+    test_results.append(tester.test_get_fournisseurs())
+    test_results.append(tester.test_create_fournisseur())
+    test_results.append(tester.test_get_stock())
+    test_results.append(tester.test_get_stock_alerts())
+    test_results.append(tester.test_get_paiements())
+    test_results.append(tester.test_search_functionality())
+    
     # Print final results
     print("\n" + "=" * 50)
     print(f"📊 FINAL RESULTS")
