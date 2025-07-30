@@ -203,6 +203,14 @@ function App() {
     }
   };
 
+  const handlePaiementsSearch = () => {
+    if (paiementsSearch.trim() === '') {
+      setShowPaiementsData(true);
+    } else {
+      setShowPaiementsData(true);
+    }
+  };
+
   // Filtered data based on search terms
   const getFilteredClients = () => {
     if (!clientsSearch.trim()) return clients;
