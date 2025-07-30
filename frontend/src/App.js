@@ -1538,6 +1538,12 @@ ECO PUMP AFRIK - Tous droits réservés`;
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Rapports</span>
             </TabsTrigger>
+            {currentUser?.role === 'admin' && (
+              <TabsTrigger value="administration" className="flex items-center space-x-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Administration</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Search Results */}
