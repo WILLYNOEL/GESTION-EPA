@@ -56,6 +56,25 @@ try:
     stock_collection = db.stock
     paiements_collection = db.paiements
     settings_collection = db.settings
+    users_collection = db.users  # Nouvelle collection pour les utilisateurs
+    
+    # Créer un utilisateur admin par défaut s'il n'existe pas
+    admin_user = users_collection.find_one({"username": "admin"})
+    if not admin_user:
+        # Mot de passe par défaut : admin123
+        default_password = "admin123"
+        hashed_password = hashlib.sha256(default_password.encode()).hexdigest()
+        users_collection.insert_one({
+            "user_id": str(uuid.uuid4()),
+            "username": "admin",
+            "password": hashed_password,
+            "email": "admin@ecopumpafrik.com",
+            "role": "admin",
+            "is_active": True,
+            "created_at": datetime.now(),
+            "last_login": None
+        })
+        logger.info("Utilisateur admin par défaut créé (admin/admin123)")
     
     logger.info(f"Connected to MongoDB: {MONGO_URL}/{DB_NAME}")
 except Exception as e:
