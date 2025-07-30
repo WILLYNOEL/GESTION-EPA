@@ -2385,6 +2385,51 @@ async def delete_user(user_id: str, current_user: dict = Depends(verify_token)):
         logger.error(f"Error deleting user: {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la suppression de l'utilisateur")
 
+@app.put("/api/auth/users/{user_id}/permissions")
+async def update_user_permissions(user_id: str, permissions_data: UserPermissions, current_user: dict = Depends(verify_token)):
+    """Mettre à jour les permissions d'un utilisateur (admin uniquement)"""
+    try:
+        # Vérifier que l'utilisateur actuel est admin
+        if current_user["role"] != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seuls les administrateurs peuvent modifier les permissions"
+            )
+        
+        # Valider les permissions (tous les onglets disponibles)
+        valid_permissions = {
+            "dashboard", "clients", "fournisseurs", "devis", 
+            "factures", "stock", "paiements", "rapports", "administration"
+        }
+        
+        # Vérifier que toutes les permissions sont valides
+        for permission_key in permissions_data.permissions.keys():
+            if permission_key not in valid_permissions:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Permission invalide: {permission_key}"
+                )
+        
+        # Mettre à jour les permissions
+        result = users_collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"permissions": permissions_data.permissions}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Utilisateur introuvable"
+            )
+        
+        return {"message": "Permissions mises à jour avec succès"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating user permissions: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour des permissions")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
