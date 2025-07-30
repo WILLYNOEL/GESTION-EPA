@@ -2005,10 +2005,18 @@ function App() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end space-x-2">
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewDocument('paiement', paiement.paiement_id)}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDownloadDocument('recu', paiement.paiement_id)}
+                              >
                                 <Download className="h-4 w-4" />
                               </Button>
                             </div>
