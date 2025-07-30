@@ -10,6 +10,7 @@ class EcoPumpAfrikAPITester:
         self.tests_passed = 0
         self.created_client_id = None
         self.created_devis_id = None
+        self.auth_token = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None, expect_pdf=False):
         """Run a single API test"""
