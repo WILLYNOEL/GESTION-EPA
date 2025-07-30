@@ -1524,40 +1524,56 @@ ECO PUMP AFRIK - Tous droits réservés`;
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Modern Navigation Tabs */}
-          <TabsList className="grid w-full grid-cols-8 lg:grid-cols-8 bg-white rounded-lg shadow-md p-1 border border-gray-200">
-            <TabsTrigger value="dashboard" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Tableau de Bord</span>
-            </TabsTrigger>
-            <TabsTrigger value="clients" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Clients</span>
-            </TabsTrigger>
-            <TabsTrigger value="fournisseurs" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Fournisseurs</span>
-            </TabsTrigger>
-            <TabsTrigger value="devis" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileCheck className="h-4 w-4" />
-              <span className="hidden sm:inline">Devis</span>
-            </TabsTrigger>
-            <TabsTrigger value="factures" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Factures</span>
-            </TabsTrigger>
-            <TabsTrigger value="stock" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">Stock</span>
-            </TabsTrigger>
-            <TabsTrigger value="paiements" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <CreditCard className="h-4 w-4" />
-              <span className="hidden sm:inline">Paiements</span>
-            </TabsTrigger>
-            <TabsTrigger value="rapports" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Rapports</span>
-            </TabsTrigger>
-            {currentUser?.role === 'admin' && (
+          <TabsList className="grid w-full grid-cols-auto lg:grid-cols-auto bg-white rounded-lg shadow-md p-1 border border-gray-200 flex flex-wrap">
+            {hasPermission('dashboard') && (
+              <TabsTrigger value="dashboard" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Tableau de Bord</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('clients') && (
+              <TabsTrigger value="clients" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Clients</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('fournisseurs') && (
+              <TabsTrigger value="fournisseurs" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Fournisseurs</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('devis') && (
+              <TabsTrigger value="devis" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <FileCheck className="h-4 w-4" />
+                <span className="hidden sm:inline">Devis</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('factures') && (
+              <TabsTrigger value="factures" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Factures</span>
+              </TabsTrigger>  
+            )}
+            {hasPermission('stock') && (
+              <TabsTrigger value="stock" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Package className="h-4 w-4" />
+                <span className="hidden sm:inline">Stock</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('paiements') && (
+              <TabsTrigger value="paiements" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Paiements</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('rapports') && (
+              <TabsTrigger value="rapports" className="flex items-center space-x-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Rapports</span>
+              </TabsTrigger>
+            )}
+            {hasPermission('administration') && (
               <TabsTrigger value="administration" className="flex items-center space-x-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
                 <Shield className="h-4 w-4" />
                 <span className="hidden sm:inline">Administration</span>
