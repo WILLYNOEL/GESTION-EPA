@@ -578,34 +578,109 @@ Factures: ${stats.total_factures}`;
     try {
       setLoading(true);
       
-      // Create CSV content (Excel compatible)
-      const csvContent = `ECO PUMP AFRIK - EXPORT DONNÉES\n
-CLIENTS:
-Nom,Email,Téléphone,Devise,Type,Date Création
-${clients.map(c => `"${c.nom}","${c.email || ''}","${c.telephone || ''}","${c.devise}","${c.type_client}","${formatDate(c.created_at)}"`).join('\n')}
+      // Create professional Excel-compatible CSV with ECO PUMP AFRIK branding
+      const csvHeader = `ECO PUMP AFRIK - GESTION INTELLIGENTE
+🏭 Export Données Complètes
+Date d'export: ${new Date().toLocaleDateString('fr-FR')}
+Adresse: Cocody - Angré 7e Tranche
+Tel: +225 0707806359 / +225 0748576956
+Email: ouanlo.ouattara@ecopumpafrik.com
+Site Web: www.ecopumpafrik.com
 
-DEVIS:
-Numéro,Client,Montant,Statut,Date
-${devis.map(d => `"${d.numero_devis}","${d.client_nom}","${d.total_ttc}","${d.statut}","${formatDate(d.date_devis)}"`).join('\n')}
+═══════════════════════════════════════════════════════════════════════════════
 
-FACTURES:
-Numéro,Client,Montant,Statut Paiement,Date
-${factures.map(f => `"${f.numero_facture}","${f.client_nom}","${f.total_ttc}","${f.statut_paiement}","${formatDate(f.date_facture)}"`).join('\n')}`;
+RÉSUMÉ STATISTIQUES:
+- Total Clients: ${stats.total_clients || 0}
+- Total Devis: ${stats.total_devis || 0} 
+- Total Factures: ${stats.total_factures || 0}
+- Montant à Encaisser: ${formatCurrency(stats.montant_a_encaisser || 0)}
 
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ECO_PUMP_AFRIK_Export_${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+═══════════════════════════════════════════════════════════════════════════════
+
+DONNÉES CLIENTS:`;
+
+      const clientsData = clients.map(c => [
+        c.nom,
+        c.numero_cc || '',
+        c.numero_rc || '',
+        c.nif || '',
+        c.email || '',
+        c.telephone || '',
+        c.adresse?.replace(/[\r\n]+/g, ' ') || '',
+        c.devise,
+        c.type_client,
+        c.conditions_paiement || '',
+        formatDate(c.created_at)
+      ]);
+
+      const devisData = devis.map(d => [
+        d.numero_devis,
+        d.client_nom,
+        formatDate(d.date_devis),
+        formatCurrency(d.total_ttc, d.devise),
+        d.devise,
+        d.statut,
+        d.delai_livraison || '',
+        d.conditions_paiement || '',
+        d.reference_commande || ''
+      ]);
+
+      const facturesData = factures.map(f => [
+        f.numero_facture,
+        f.client_nom,
+        formatDate(f.date_facture),
+        formatCurrency(f.total_ttc, f.devise),
+        f.devise,
+        f.statut_paiement,
+        formatCurrency(f.montant_paye || 0, f.devise),
+        formatCurrency((f.total_ttc - (f.montant_paye || 0)), f.devise)
+      ]);
+
+      // Create CSV content with proper structure
+      const csvContent = `${csvHeader}
+
+Nom,Numéro CC,Numéro RC,NIF,Email,Téléphone,Adresse,Devise,Type Client,Conditions Paiement,Date Création
+${clientsData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DONNÉES DEVIS:
+Numéro Devis,Client,Date,Montant,Devise,Statut,Délai Livraison,Conditions Paiement,Référence Commande
+${devisData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DONNÉES FACTURES:
+Numéro Facture,Client,Date,Montant Total,Devise,Statut Paiement,Montant Payé,Solde Restant
+${facturesData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ANALYSE FINANCIÈRE:
+Total Devis ce mois:, ${formatCurrency(stats.montant_devis_mois || 0)}
+Total Factures ce mois:, ${formatCurrency(stats.montant_factures_mois || 0)}
+Montant à Encaisser:, ${formatCurrency(stats.montant_a_encaisser || 0)}
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Rapport généré le: ${new Date().toLocaleString('fr-FR')}
+ECO PUMP AFRIK - Tous droits réservés`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ECO_PUMP_AFRIK_Export_Complet_${new Date().toISOString().split('T')[0]}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      alert('Export Excel (CSV) téléchargé avec succès !');
+      alert('✅ Export Excel complet téléchargé avec succès !\n🏭 ECO PUMP AFRIK - Données exportées avec logo et structure professionnelle');
     } catch (error) {
       console.error('Error exporting Excel:', error);
-      alert(`Erreur lors de l'export: ${error.message}`);
+      alert(`❌ Erreur lors de l'export: ${error.message}`);
     } finally {
       setLoading(false);
     }
