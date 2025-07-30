@@ -268,6 +268,19 @@ function App() {
     });
   };
 
+  // Fonction pour filtrer les documents (factures) par numéro ou client
+  const getFilteredDocuments = () => {
+    if (!documentSearch.trim()) {
+      return factures.filter(f => f.statut_paiement !== 'payé');
+    }
+    return factures.filter(f => 
+      f.statut_paiement !== 'payé' && (
+        f.numero_facture.toLowerCase().includes(documentSearch.toLowerCase()) ||
+        f.client_nom.toLowerCase().includes(documentSearch.toLowerCase())
+      )
+    );
+  };
+
   // Fonctions d'authentification
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté
